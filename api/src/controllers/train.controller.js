@@ -60,7 +60,7 @@ module.exports.get = async (req, res) => {
         fs.createReadStream(`${STORAGE.MEDIA.PATH}/${key}`)
       ).catch((/* error */) => ({ width: 0, height: 0 }));
       const orientation = await getOrientation(
-        fs.readFileSync(`${STORAGE.MEDIA.PATH}/${key}`)
+        await fs.promises.readFile(`${STORAGE.MEDIA.PATH}/${key}`)
       ).catch((/* error */) => 0);
 
       const output = {

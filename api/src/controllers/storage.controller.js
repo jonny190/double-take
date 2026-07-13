@@ -26,9 +26,7 @@ module.exports.matches = async (req, res) => {
     const match = db.prepare('SELECT * FROM match WHERE filename = ?').bind(filename).get();
 
     if (!match || !tryParseJSON(match.response)) {
-      const buffer = fs.readFileSync(source);
-      res.set('Content-Type', 'image/jpeg');
-      return res.end(buffer);
+      return filesystem.streamImage(res, source);
     }
     const response = JSON.parse(match.response);
 
@@ -88,16 +86,16 @@ module.exports.matches = async (req, res) => {
     return res.end(buffer);
   }
 
-  const buffer =
-    req.query.thumb === ''
-      ? await sharp(source, { failOn: 'none' })
-          .jpeg({ quality: QUALITY })
-          .resize(WIDTH)
-          .keepMetadata()
-          .toBuffer()
-      : fs.readFileSync(source);
-  res.set('Content-Type', 'image/jpeg');
-  return res.end(buffer);
+  if (req.query.thumb === '') {
+    const buffer = await sharp(source, { failOn: 'none' })
+      .jpeg({ quality: QUALITY })
+      .resize(WIDTH)
+      .keepMetadata()
+      .toBuffer();
+    res.set('Content-Type', 'image/jpeg');
+    return res.end(buffer);
+  }
+  return filesystem.streamImage(res, source);
 };
 
 module.exports.train = async (req, res) => {
@@ -106,12 +104,16 @@ module.exports.train = async (req, res) => {
 
   if (!fs.existsSync(source)) return res.status(BAD_REQUEST).error(`${source} does not exist`);
 
-  const buffer =
-    req.query.thumb === ''
-      ? await sharp(source).jpeg({ quality: QUALITY }).resize(WIDTH).keepMetadata().toBuffer()
-      : fs.readFileSync(source);
-  res.set('Content-Type', 'image/jpeg');
-  return res.end(buffer);
+  if (req.query.thumb === '') {
+    const buffer = await sharp(source)
+      .jpeg({ quality: QUALITY })
+      .resize(WIDTH)
+      .keepMetadata()
+      .toBuffer();
+    res.set('Content-Type', 'image/jpeg');
+    return res.end(buffer);
+  }
+  return filesystem.streamImage(res, source);
 };
 
 module.exports.delete = async (req, res) => {
@@ -164,8 +166,7 @@ module.exports.latest = async (req, res) => {
     .all(name);
 
   if ((!nameMatch && !cameraMatch) || box !== 'true') {
-    res.set('Content-Type', 'image/jpeg');
-    return res.end(fs.readFileSync(source));
+    return filesystem.streamImage(res, source);
   }
 
   const { filename: originalFilename } = nameMatch || cameraMatch;

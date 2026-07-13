@@ -62,6 +62,20 @@ module.exports.files = {
   },
 };
 
+// Stream a file to the response instead of buffering it with a blocking
+// readFileSync. Keeps the event loop free and avoids holding whole images
+// in memory on the hot thumbnail/match endpoints.
+module.exports.streamImage = (res, source, contentType = 'image/jpeg') => {
+  res.set('Content-Type', contentType);
+  const stream = fs.createReadStream(source);
+  stream.on('error', (error) => {
+    console.error(`stream image error: ${error.message}`);
+    if (!res.headersSent) res.status(500);
+    res.end();
+  });
+  return stream.pipe(res);
+};
+
 module.exports.writer = async (file, data) => {
   fs.writeFileSync(file, data);
 };
