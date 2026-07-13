@@ -90,10 +90,10 @@ module.exports.matches = async (req, res) => {
 
   const buffer =
     req.query.thumb === ''
-      ? await sharp(source, { failOnError: false })
+      ? await sharp(source, { failOn: 'none' })
           .jpeg({ quality: QUALITY })
           .resize(WIDTH)
-          .withMetadata()
+          .keepMetadata()
           .toBuffer()
       : fs.readFileSync(source);
   res.set('Content-Type', 'image/jpeg');
@@ -108,7 +108,7 @@ module.exports.train = async (req, res) => {
 
   const buffer =
     req.query.thumb === ''
-      ? await sharp(source).jpeg({ quality: QUALITY }).resize(WIDTH).withMetadata().toBuffer()
+      ? await sharp(source).jpeg({ quality: QUALITY }).resize(WIDTH).keepMetadata().toBuffer()
       : fs.readFileSync(source);
   res.set('Content-Type', 'image/jpeg');
   return res.end(buffer);
