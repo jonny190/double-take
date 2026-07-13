@@ -209,6 +209,6 @@ module.exports.upload = async (req, res) => {
       },
       validateStatus: () => true,
     });
-    fs.delete(`${STORAGE.TMP.PATH}/${filename}`, buffer);
+    fs.delete(`${STORAGE.TMP.PATH}/${filename}`);
   }
 };

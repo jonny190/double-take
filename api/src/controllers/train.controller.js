@@ -1,4 +1,5 @@
 const fs = require('fs');
+const path = require('path');
 const sizeOf = require('probe-image-size');
 const { getOrientation } = require('get-orientation');
 const time = require('../util/time.util');
@@ -99,7 +100,9 @@ module.exports.add = async (req, res) => {
   if (req.files) {
     await Promise.all(
       req.files.map(async (obj) => {
-        const { originalname, buffer, mimetype } = obj;
+        const { buffer, mimetype } = obj;
+        // strip any path components to prevent directory traversal via the filename
+        const originalname = path.basename(obj.originalname);
         if (!['image/jpeg', 'image/png'].includes(mimetype)) {
           console.warn(`training incorrect mime type: ${mimetype}`);
           return;

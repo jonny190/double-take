@@ -111,8 +111,6 @@ module.exports.train = async (req, res) => {
       ? await sharp(source).jpeg({ quality: QUALITY }).resize(WIDTH).withMetadata().toBuffer()
       : fs.readFileSync(source);
   res.set('Content-Type', 'image/jpeg');
-
-  res.set('Content-Type', 'image/jpeg');
   return res.end(buffer);
 };
 
@@ -120,12 +118,9 @@ module.exports.delete = async (req, res) => {
   const { files } = req.body;
   if (files && files.length) {
     const db = database.connect();
-    db.prepare(
-      `DELETE FROM file WHERE id IN (${files.map((obj) => `'${obj.id}'`).join(',')})`
-    ).run();
-    db.prepare(
-      `DELETE FROM train WHERE fileId IN (${files.map((obj) => `'${obj.id}'`).join(',')})`
-    ).run();
+    const ids = files.map((obj) => obj.id);
+    db.prepare(`DELETE FROM file WHERE id IN (${database.params(ids)})`).run(ids);
+    db.prepare(`DELETE FROM train WHERE fileId IN (${database.params(ids)})`).run(ids);
     files.forEach((obj) => {
       filesystem.delete(`${PATH}/${obj.key}`);
     });
