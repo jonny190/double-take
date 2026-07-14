@@ -1,7 +1,7 @@
 <template>
   <div id="app-wrapper">
     <div class="loading p-d-flex p-jc-center" :class="{ loaded, hidden, dark }">
-      <img alt="Double Take" class="p-d-block" :src="require('@/assets/img/icon.svg')" style="width: 100px" />
+      <img alt="Double Take" class="p-d-block" :src="icon" style="width: 100px" />
     </div>
     <Toast position="bottom-left" />
     <ConfirmDialog />
@@ -21,6 +21,7 @@ import 'primeicons/primeicons.css';
 import Constants from '@/util/constants.util';
 import ApiService from '@/services/api.service';
 import Toolbar from '@/components/Toolbar.vue';
+import icon from '@/assets/img/icon.svg';
 import '@/assets/font-awesome/css/all.min.css';
 
 export default {
@@ -31,6 +32,7 @@ export default {
     Toolbar,
   },
   data: () => ({
+    icon,
     socket: io(Constants().socket),
     toolbarHeight: null,
     loaded: false,
@@ -139,7 +141,7 @@ export default {
     },
     error(error) {
       if (error?.response?.config?.url !== 'auth' && error?.response?.status === 401) return;
-      if (process.env.NODE_ENV === 'development') console.error(error);
+      if (import.meta.env.DEV) console.error(error);
       this.$toast.add({
         severity: 'error',
         detail: error.message,
@@ -172,7 +174,7 @@ export default {
       return runSetup;
     },
     async addAnalytics() {
-      if (process.env.NODE_ENV !== 'production') return;
+      if (!import.meta.env.PROD) return;
       ApiService.get('config')
         .then(({ data }) => {
           if (data.telemetry) {

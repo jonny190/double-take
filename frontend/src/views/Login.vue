@@ -1,6 +1,6 @@
 <template>
   <div class="wrapper p-text-center">
-    <img class="icon p-d-block" :src="require('@/assets/img/icon.svg')" alt="Double Take" />
+    <img class="icon p-d-block" :src="icon" alt="Double Take" />
     <i v-if="loading" class="pi pi-spin pi-spinner" style="font-size: 3rem; margin-top: 25px"></i>
     <div v-else class="login-box">
       <div class="p-formgroup-inline p-d-inline-flex p-ai-center">
@@ -41,6 +41,7 @@ import Button from 'primevue/button';
 
 import ApiService from '@/services/api.service';
 import Sleep from '@/util/sleep.util';
+import icon from '@/assets/img/icon.svg';
 
 export default {
   components: {
@@ -48,6 +49,7 @@ export default {
     Button,
   },
   data: () => ({
+    icon,
     loading: false,
     firstSetup: false,
     password: null,
