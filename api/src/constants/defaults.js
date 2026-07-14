@@ -56,6 +56,10 @@ module.exports = {
       timeout: 15,
       opencv_face_required: false,
     },
+    codeprojectai: {
+      timeout: 15,
+      opencv_face_required: false,
+    },
     facebox: {
       timeout: 15,
       opencv_face_required: false,
