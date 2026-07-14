@@ -63,7 +63,11 @@ remaining dev-only audit warnings.
 Deferred deliberately during the initial dependency modernization to avoid
 high-risk jumps. Tackle one at a time.
 
-- ⬜ Express 4 → 5 (now GA).
+- ✅ Express 4 → 5. Removed the obsolete `express-async-errors` shim (Express 5
+  forwards rejected promises natively), replaced `'*'` route strings with
+  path-less middleware / root mounts, and guarded the empty `UI.PATH` mount.
+  Verified via the test suite plus a boot exercising routing, JSON webhooks,
+  the 404 catch-all, and the SPA fallback.
 - ⬜ Joi 17 → 18.
 - ⬜ PrimeVue 3 → 4 (largest item — a full theming/component redesign; budget
   real UI work).

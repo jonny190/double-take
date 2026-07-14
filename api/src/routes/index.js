@@ -18,6 +18,7 @@ router.use('/status', require('./status.routes'));
 router.use('/export', require('./export.routes'));
 
 router.use(STORAGE.TMP.PATH, express.static(STORAGE.TMP.PATH));
-router.all('*', (req, res) => res.status(NOT_FOUND).error(`${req.originalUrl} not found`));
+// path-less middleware acts as the catch-all 404 (Express 5 rejects '*' paths)
+router.use((req, res) => res.status(NOT_FOUND).error(`${req.originalUrl} not found`));
 
 module.exports = router;
