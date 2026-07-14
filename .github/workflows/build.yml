@@ -10,7 +10,8 @@ on:
 
 jobs:
   build-docker:
-    if: github.repository == 'jakowenko/double-take'
+    # runs on the fork; further downstream forks are skipped
+    if: github.repository == 'jonny190/double-take'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -21,16 +22,22 @@ jobs:
         with:
           path: ./package.json
           prop_path: version
+      # Publish only when Docker Hub credentials are configured. The image name
+      # defaults to the GitHub repo (owner/name); override with a DOCKER_IMAGE
+      # repository variable if your Docker Hub namespace differs.
+      - name: Determine publish
+        id: publish
+        run: echo "enabled=${{ secrets.DOCKER_PASSWORD != '' }}" >> "$GITHUB_OUTPUT"
       - name: Set ENV to beta
         if: ${{ github.event.release.target_commitish == 'beta' || (github.event_name == 'workflow_dispatch' && github.ref_name == 'beta') }}
         run: |
           echo "ARCH=linux/amd64" >> $GITHUB_ENV
-          echo "TAGS=jakowenko/double-take:beta" >> $GITHUB_ENV
+          echo "TAGS=${{ vars.DOCKER_IMAGE || github.repository }}:beta" >> $GITHUB_ENV
       - name: Set ENV to latest
         if: ${{ github.event.release.target_commitish == 'master' || (github.event_name == 'workflow_dispatch' && github.ref_name == 'master') }}
         run: |
           echo "ARCH=linux/amd64,linux/arm/v7,linux/arm64" >> $GITHUB_ENV
-          echo "TAGS=jakowenko/double-take:latest,jakowenko/double-take:${{steps.version.outputs.prop}}" >> $GITHUB_ENV
+          echo "TAGS=${{ vars.DOCKER_IMAGE || github.repository }}:latest,${{ vars.DOCKER_IMAGE || github.repository }}:${{steps.version.outputs.prop}}" >> $GITHUB_ENV
       - name: Version with SHA-7
         run: |
           npm version ${{steps.version.outputs.prop}}-$(echo ${GITHUB_SHA} | cut -c1-7) --no-git-tag-version
@@ -48,17 +55,18 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-buildx-
       - name: Docker Login
+        if: steps.publish.outputs.enabled == 'true'
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-      - name: Docker Buildx (push)
+      - name: Docker Buildx (build / push)
         uses: docker/build-push-action@v5
         with:
           context: .
           file: ./.build/Dockerfile
           platforms: ${{env.ARCH}}
-          push: true
+          push: ${{ steps.publish.outputs.enabled == 'true' }}
           tags: ${{env.TAGS}}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new
