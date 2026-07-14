@@ -1,8 +1,14 @@
 const express = require('express');
 const { jwt, validate, Joi } = require('../middlewares');
+const rateLimit = require('../middlewares/rate-limit');
 const controller = require('../controllers/storage.controller');
 
 const router = express.Router();
+
+// throttle the image/storage endpoints to bound abuse of the routes that read
+// files from disk (sized above the per-page thumbnail burst so browsing is
+// never affected)
+router.use(rateLimit);
 
 // disallow path separators and traversal sequences in filesystem params
 const safeName = Joi.string()
