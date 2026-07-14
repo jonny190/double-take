@@ -1,6 +1,12 @@
 const crypto = require('crypto');
 const axios = require('axios');
 
+// NOTE: MD5 here is not password storage — it is the digest algorithm mandated
+// by the HTTP Digest Access Authentication spec (RFC 2617). The hash algorithm
+// is dictated by the server's `WWW-Authenticate` challenge (`algorithm`
+// directive), so it cannot be substituted with a stronger KDF without breaking
+// interoperability with cameras that only speak MD5 digest. Any CodeQL
+// "insufficient computational effort" alert on this line is a false positive.
 const md5 = (value) => crypto.createHash('md5').update(value).digest('hex');
 
 // Parse a WWW-Authenticate: Digest challenge into its key/value directives.
