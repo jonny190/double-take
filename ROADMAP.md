@@ -68,7 +68,9 @@ high-risk jumps. Tackle one at a time.
   path-less middleware / root mounts, and guarded the empty `UI.PATH` mount.
   Verified via the test suite plus a boot exercising routing, JSON webhooks,
   the 404 catch-all, and the SPA fallback.
-- ⬜ Joi 17 → 18.
+- ✅ Joi 17 → 18 (API-compatible drop-in; the validation tests pass unchanged).
+  Bumped `engines.node` to `>= 20` to match Joi 18's requirement (Node 18 is
+  already EOL, and Docker/CI run 20).
 - ⬜ PrimeVue 3 → 4 (largest item — a full theming/component redesign; budget
   real UI work).
 
