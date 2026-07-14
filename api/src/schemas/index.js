@@ -110,6 +110,7 @@ module.exports.config = {
       anyOf: [
         { required: ['compreface'] },
         { required: ['deepstack'] },
+        { required: ['codeprojectai'] },
         { required: ['facebox'] },
         { required: ['rekognition'] },
       ],
@@ -124,6 +125,15 @@ module.exports.config = {
           },
         },
         deepstack: {
+          type: 'object',
+          required: ['url'],
+          properties: {
+            url: { type: 'string' },
+            opencv_face_required: { type: 'boolean' },
+            cameras: { type: 'array' },
+          },
+        },
+        codeprojectai: {
           type: 'object',
           required: ['url'],
           properties: {

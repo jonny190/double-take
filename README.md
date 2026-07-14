@@ -35,8 +35,9 @@ There's a lot of great open source software to perform facial recognition, but e
 
 - [CompreFace](https://github.com/exadel-inc/CompreFace)
 - [Amazon Rekognition](https://aws.amazon.com/rekognition)
-- [DeepStack](https://deepstack.cc)
-- [Facebox](https://machinebox.io)
+- [CodeProject.AI](https://www.codeproject.com/AI/index.aspx)
+- [DeepStack](https://deepstack.cc) (discontinued upstream — use CodeProject.AI, its API-compatible successor)
+- [Facebox](https://machinebox.io) (discontinued upstream)
 
 ### Supported NVRs
 
@@ -492,6 +493,20 @@ detectors:
     #   - garage
 
   deepstack:
+    url:
+    key:
+    # number of seconds before the request times out and is aborted
+    timeout: 15
+    # require opencv to find a face before processing with detector
+    opencv_face_required: false
+    # only process images from specific cameras, if omitted then all cameras will be processed
+    # cameras:
+    #   - front-door
+    #   - garage
+
+  # CodeProject.AI is the maintained, API-compatible successor to DeepStack
+  # (default server port is 32168)
+  codeprojectai:
     url:
     key:
     # number of seconds before the request times out and is aborted

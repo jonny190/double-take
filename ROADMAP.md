@@ -78,9 +78,11 @@ high-risk jumps. Tackle one at a time.
 
 Half of the bundled detectors point at abandoned upstreams.
 
-- ⬜ Add **CodeProject.AI** support (the near-compatible successor to the
-  discontinued DeepStack).
-- ⬜ Mark **Facebox** (machinebox, dead) deprecated.
+- ✅ Add **CodeProject.AI** support (the API-compatible successor to the
+  discontinued DeepStack) — new detector, defaults, config schema, docs, and a
+  `normalize` unit test.
+- ✅ Flag **DeepStack** and **Facebox** as discontinued upstream in the docs.
+- ⬜ Consider fully removing Facebox in a future major.
 - ⬜ Lead docs with **CompreFace** (actively maintained, self-hosted) and AWS
   Rekognition (cloud) as the primary options.
 
