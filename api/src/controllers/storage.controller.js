@@ -26,9 +26,7 @@ module.exports.matches = async (req, res) => {
     const match = db.prepare('SELECT * FROM match WHERE filename = ?').bind(filename).get();
 
     if (!match || !tryParseJSON(match.response)) {
-      const buffer = fs.readFileSync(source);
-      res.set('Content-Type', 'image/jpeg');
-      return res.end(buffer);
+      return filesystem.streamImage(res, source);
     }
     const response = JSON.parse(match.response);
 
@@ -88,16 +86,16 @@ module.exports.matches = async (req, res) => {
     return res.end(buffer);
   }
 
-  const buffer =
-    req.query.thumb === ''
-      ? await sharp(source, { failOnError: false })
-          .jpeg({ quality: QUALITY })
-          .resize(WIDTH)
-          .withMetadata()
-          .toBuffer()
-      : fs.readFileSync(source);
-  res.set('Content-Type', 'image/jpeg');
-  return res.end(buffer);
+  if (req.query.thumb === '') {
+    const buffer = await sharp(source, { failOn: 'none' })
+      .jpeg({ quality: QUALITY })
+      .resize(WIDTH)
+      .keepMetadata()
+      .toBuffer();
+    res.set('Content-Type', 'image/jpeg');
+    return res.end(buffer);
+  }
+  return filesystem.streamImage(res, source);
 };
 
 module.exports.train = async (req, res) => {
@@ -106,26 +104,25 @@ module.exports.train = async (req, res) => {
 
   if (!fs.existsSync(source)) return res.status(BAD_REQUEST).error(`${source} does not exist`);
 
-  const buffer =
-    req.query.thumb === ''
-      ? await sharp(source).jpeg({ quality: QUALITY }).resize(WIDTH).withMetadata().toBuffer()
-      : fs.readFileSync(source);
-  res.set('Content-Type', 'image/jpeg');
-
-  res.set('Content-Type', 'image/jpeg');
-  return res.end(buffer);
+  if (req.query.thumb === '') {
+    const buffer = await sharp(source)
+      .jpeg({ quality: QUALITY })
+      .resize(WIDTH)
+      .keepMetadata()
+      .toBuffer();
+    res.set('Content-Type', 'image/jpeg');
+    return res.end(buffer);
+  }
+  return filesystem.streamImage(res, source);
 };
 
 module.exports.delete = async (req, res) => {
   const { files } = req.body;
   if (files && files.length) {
     const db = database.connect();
-    db.prepare(
-      `DELETE FROM file WHERE id IN (${files.map((obj) => `'${obj.id}'`).join(',')})`
-    ).run();
-    db.prepare(
-      `DELETE FROM train WHERE fileId IN (${files.map((obj) => `'${obj.id}'`).join(',')})`
-    ).run();
+    const ids = files.map((obj) => obj.id);
+    db.prepare(`DELETE FROM file WHERE id IN (${database.params(ids)})`).run(ids);
+    db.prepare(`DELETE FROM train WHERE fileId IN (${database.params(ids)})`).run(ids);
     files.forEach((obj) => {
       filesystem.delete(`${PATH}/${obj.key}`);
     });
@@ -169,8 +166,7 @@ module.exports.latest = async (req, res) => {
     .all(name);
 
   if ((!nameMatch && !cameraMatch) || box !== 'true') {
-    res.set('Content-Type', 'image/jpeg');
-    return res.end(fs.readFileSync(source));
+    return filesystem.streamImage(res, source);
   }
 
   const { filename: originalFilename } = nameMatch || cameraMatch;
