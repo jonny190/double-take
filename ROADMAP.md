@@ -55,9 +55,14 @@ refactors safe.
 `@vue/cli-service` (webpack) is effectively end-of-life and is the source of the
 remaining dev-only audit warnings.
 
-- ⬜ Migrate the Vue 3 app from vue-cli to Vite. SFCs port cleanly; the work is
-  build config, env / `publicPath` handling, the ace-editor + prism integration,
-  and the runtime `index.html` script injection the API performs.
+- ✅ Migrated the Vue 3 app from vue-cli to **Vite 6**. Added `vite.config.js`
+  (relative `base`, `@` alias, dev port 8080) and a root `index.html`; replaced
+  the webpack-only `ace-builds/webpack-resolver` with `setModuleUrl` +
+  `import.meta.glob` for the YAML mode/worker and themes; swapped
+  `require('@/assets/...')` for ESM asset imports; migrated `process.env.NODE_ENV`
+  to `import.meta.env`; updated the Dockerfiles; removed the vue-cli config files.
+  **Verified in a headless browser** (Chromium): app mounts, routes render, all
+  API calls 200, the YAML config editor loads, no console errors.
 
 ## Phase 3 — Framework majors (behind the test net)
 

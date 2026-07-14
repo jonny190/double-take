@@ -20,7 +20,7 @@ COPY /api/src ./src
 WORKDIR /double-take/frontend
 COPY /frontend/src ./src
 COPY /frontend/public ./public
-COPY /frontend/.env.production ./frontend/vue.config.js ./
+COPY /frontend/vite.config.js /frontend/index.html ./
 
 WORKDIR /
 RUN mkdir /.storage

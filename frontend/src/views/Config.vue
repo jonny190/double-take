@@ -124,11 +124,11 @@
 import PullToRefresh from 'pulltorefreshjs';
 import copy from 'copy-to-clipboard';
 
-import 'ace-builds';
-import 'ace-builds/webpack-resolver';
-
+import ace from 'ace-builds';
 import { VAceEditor } from 'vue3-ace-editor';
 import 'ace-builds/src-noconflict/mode-yaml';
+import modeYamlUrl from 'ace-builds/src-noconflict/mode-yaml?url';
+import workerYamlUrl from 'ace-builds/src-noconflict/worker-yaml?url';
 
 import Button from 'primevue/button';
 import Dropdown from 'primevue/dropdown';
@@ -140,6 +140,22 @@ import Time from '@/util/time.util';
 import Sleep from '@/util/sleep.util';
 import ApiService from '@/services/api.service';
 import { version } from '../../package.json';
+
+// Vite replacement for ace-builds/webpack-resolver: point ace at bundled asset
+// URLs for the YAML mode/worker, and register every bundled theme so the editor
+// theme picker keeps working.
+ace.config.setModuleUrl('ace/mode/yaml', modeYamlUrl);
+ace.config.setModuleUrl('ace/mode/yaml_worker', workerYamlUrl);
+
+const aceThemes = import.meta.glob('../../node_modules/ace-builds/src-noconflict/theme-*.js', {
+  query: '?url',
+  import: 'default',
+  eager: true,
+});
+Object.entries(aceThemes).forEach(([path, url]) => {
+  const match = path.match(/theme-(.+)\.js$/);
+  if (match) ace.config.setModuleUrl(`ace/theme/${match[1]}`, url);
+});
 
 export default {
   components: {
