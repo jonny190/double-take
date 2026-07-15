@@ -14,6 +14,7 @@ process.env.SECRETS_PATH = path.join(base, 'config');
 process.env.MEDIA_PATH = base;
 
 const DigestAuth = require('../src/util/digest.util');
+
 const { md5, parseChallenge } = DigestAuth;
 const { jwt } = require('../src/util/auth.util');
 const { tryParseJSON } = require('../src/util/validators.util');

@@ -93,7 +93,9 @@ test('no CORS header is sent in production', async () => {
   delete require.cache[require.resolve('../src/app')];
   const prodApp = require('../src/app');
   try {
-    const res = await request(prodApp).get('/api/config/theme').set('origin', 'http://evil.example');
+    const res = await request(prodApp)
+      .get('/api/config/theme')
+      .set('origin', 'http://evil.example');
     assert.strictEqual(res.headers['access-control-allow-origin'], undefined);
   } finally {
     process.env.NODE_ENV = original;

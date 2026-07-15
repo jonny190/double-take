@@ -305,7 +305,11 @@ module.exports.recognize = (data) => {
 
     clearTimeout(PERSON_RESET_TIMEOUT[camera]);
     PERSON_RESET_TIMEOUT[camera] = setTimeout(() => {
-      this.publish({ topic: `${MQTT.TOPICS.CAMERAS}/${camera}/person`, retain: true, message: '0' });
+      this.publish({
+        topic: `${MQTT.TOPICS.CAMERAS}/${camera}/person`,
+        retain: true,
+        message: '0',
+      });
       if (MQTT.TOPICS.HOMEASSISTANT) {
         this.publish({
           topic: `${MQTT.TOPICS.HOMEASSISTANT}/sensor/double-take/${camera}/state`,
@@ -330,7 +334,9 @@ module.exports.publish = (data) => {
   if (!single && !multiple) console.error('MQTT: publish error');
 
   const messages = single ? [{ ...data }] : data;
-  messages.forEach((message) => CLIENT.publish(message.topic, message.message, { retain: message.retain === true }));
+  messages.forEach((message) =>
+    CLIENT.publish(message.topic, message.message, { retain: message.retain === true })
+  );
 };
 
 module.exports.status = () => ({

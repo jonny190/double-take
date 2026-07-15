@@ -85,7 +85,9 @@ test('recognize: an unknown publishes the unknown topic', () => {
   mqtt.recognize(
     baseOutput({
       counts: { person: 1, match: 0, miss: 0, unknown: 1 },
-      unknowns: [{ name: 'unknown', confidence: 20, box: { top: 0, left: 0, width: 5, height: 5 } }],
+      unknowns: [
+        { name: 'unknown', confidence: 20, box: { top: 0, left: 0, width: 5, height: 5 } },
+      ],
     })
   );
   assert.ok(byTopic('double-take/matches/unknown'), 'unknown match topic');

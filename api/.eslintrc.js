@@ -8,6 +8,11 @@ module.exports = {
   parserOptions: {
     ecmaVersion: 2020,
   },
+  settings: {
+    // the import plugin's default resolver doesn't understand the `node:`
+    // builtin scheme (e.g. `require('node:test')`), so flag those as core
+    'import/core-modules': ['node:test', 'node:assert'],
+  },
   rules: {
     'no-unused-vars': ['error', { argsIgnorePattern: 'next' }],
     'linebreak-style': 0,
