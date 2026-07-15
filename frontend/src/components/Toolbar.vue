@@ -1,6 +1,20 @@
 <template>
   <div class="tool-bar-wrapper p-pr-3 p-d-flex p-jc-between p-ai-center" ref="toolbar">
-    <div><TabMenu :model="navigation" class="navigation" :class="{ show: showNavigation }" /></div>
+    <div>
+      <!-- PrimeVue 4 removed MenuModel's built-in `to` router integration;
+           render router items with router-link and drive the active tab from
+           the current route -->
+      <TabMenu :model="navigation" class="navigation" :class="{ show: showNavigation }" :activeIndex="activeTabIndex">
+        <template v-slot:item="{ item, props }">
+          <router-link v-slot="{ href, navigate }" :to="item.to" custom>
+            <a :href="href" v-bind="props.action" @click="(event) => navigateMenuItem(event, navigate, props)">
+              <span :class="item.icon" v-bind="props.icon"></span>
+              <span v-bind="props.label">{{ item.label }}</span>
+            </a>
+          </router-link>
+        </template>
+      </TabMenu>
+    </div>
     <div v-if="updateAvailable" class="version p-ml-auto p-mr-2" v-tooltip.left="`Update Available`">
       <div class="icon" @click="dockerHub"></div>
     </div>
@@ -17,8 +31,34 @@
             : unauthorizedMenu
         "
         :popup="true"
-      />
-      <Menu v-else ref="menu" class="double-take-menu" :model="menu" :popup="true" />
+      >
+        <template v-slot:item="{ item, props }">
+          <router-link v-if="item.to" v-slot="{ href, navigate }" :to="item.to" custom>
+            <a :href="href" v-bind="props.action" @click="(event) => navigateMenuItem(event, navigate, props)">
+              <span v-if="item.icon" :class="item.icon" v-bind="props.icon"></span>
+              <span v-bind="props.label">{{ item.label }}</span>
+            </a>
+          </router-link>
+          <a v-else :href="item.url" v-bind="props.action">
+            <span v-if="item.icon" :class="item.icon" v-bind="props.icon"></span>
+            <span v-bind="props.label">{{ item.label }}</span>
+          </a>
+        </template>
+      </Menu>
+      <Menu v-else ref="menu" class="double-take-menu" :model="menu" :popup="true">
+        <template v-slot:item="{ item, props }">
+          <router-link v-if="item.to" v-slot="{ href, navigate }" :to="item.to" custom>
+            <a :href="href" v-bind="props.action" @click="(event) => navigateMenuItem(event, navigate, props)">
+              <span v-if="item.icon" :class="item.icon" v-bind="props.icon"></span>
+              <span v-bind="props.label">{{ item.label }}</span>
+            </a>
+          </router-link>
+          <a v-else :href="item.url" v-bind="props.action">
+            <span v-if="item.icon" :class="item.icon" v-bind="props.icon"></span>
+            <span v-bind="props.label">{{ item.label }}</span>
+          </a>
+        </template>
+      </Menu>
       <Dialog
         position="top"
         :modal="true"
@@ -145,6 +185,9 @@ export default {
     }
   },
   computed: {
+    activeTabIndex() {
+      return this.navigation.findIndex((item) => item.to === this.$route.path);
+    },
     isDisabled() {
       return (
         !this.password.current ||
@@ -155,6 +198,13 @@ export default {
     },
   },
   methods: {
+    navigateMenuItem(event, navigate, props) {
+      navigate(event);
+      // TabMenu binds its click handler on the link itself; Menu binds it on a
+      // wrapper div (and click bubbling reaches it), so onClick may be absent
+      const onClick = props.action && props.action.onClick;
+      if (typeof onClick === 'function') onClick(event);
+    },
     getHeight() {
       return this.$refs.toolbar.clientHeight;
     },
