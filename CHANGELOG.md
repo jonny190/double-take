@@ -1,3 +1,10 @@
+## [1.14.7](https://github.com/jonny190/double-take/compare/v1.14.6...v1.14.7) (2026-07-15)
+
+
+### Bug Fixes
+
+* **api:** make the opencv cascade path cwd-independent; document the blob ([4f0e109](https://github.com/jonny190/double-take/commit/4f0e1098364c139e91c4a5e406c60d9e91d28d76))
+
 ## [1.14.6](https://github.com/jonny190/double-take/compare/v1.14.5...v1.14.6) (2026-07-15)
 
 
