@@ -110,7 +110,13 @@
         <div v-else-if="type === 'train'">
           <Badge value="untrained" severity="danger" class="p-mb-3" />
           <br />
-          <Select v-model="folder" :options="folders" placeholder="move and train" :showClear="true" />
+          <Select
+            v-model="folder"
+            :options="folders"
+            placeholder="move and train"
+            :showClear="true"
+            aria-label="move and train"
+          />
         </div>
       </template>
       <template v-slot:footer>
