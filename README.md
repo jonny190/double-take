@@ -636,10 +636,10 @@ ui:
 
 ```yaml
 # telemetry settings (default: shown below)
-# self hosted version of plausible.io
-# 100% anonymous, used to help improve project
-# no cookies and fully compliant with GDPR, CCPA and PECR
-telemetry: true
+# disabled by default in this fork: the upstream telemetry endpoint
+# (api.double-take.io) is no longer reachable, so enabling this only
+# produces console errors in the browser
+telemetry: false
 ```
 
 ## Storing Secrets
