@@ -52,11 +52,14 @@ refactors safe.
   slugifying). Fixing the MQTT test also surfaced a real leak: the 30s
   person-reset timer was not `unref()`-ed, so it kept the process alive on
   shutdown.
-- ⬜ Add a lint/format gate once the existing source is brought fully
-  Prettier/ESLint clean. `npm run lint` in `frontend/` now passes (the parser
-  needed `requireConfigFile: false` after the Vite migration removed the babel
-  config, plus a handful of small source fixes); the API side still needs the
-  same treatment before a CI gate makes sense.
+- ✅ Added a lint gate to CI. The API is now ESLint/Prettier clean (fixed a
+  real `no-promise-executor-return` in `sleep.util`, told the import resolver
+  about the `node:` builtin scheme, and Prettier-formatted the rest) and ships
+  its own `lint` script and eslint devDependencies so it lints standalone. A
+  new `lint` CI job runs `npm run lint` for both `api/` and `frontend/` on
+  every PR/push (installed with `--ignore-scripts`, so no native builds). The
+  frontend still emits Prettier *warnings* (non-fatal); tightening those to
+  errors is a future cleanup.
 
 ## Phase 2 — Frontend build tooling: vue-cli → Vite
 

@@ -5,7 +5,8 @@
   "scripts": {
     "start": "node server.js",
     "debug": "nodemon server.js",
-    "test": "node --test"
+    "test": "node --test",
+    "lint": "eslint server.js \"src/**/*.js\" \"test/**/*.js\" --ignore-pattern \"src/util/opencv/lib.js\""
   },
   "repository": {
     "type": "git",
@@ -51,6 +52,12 @@
     "node": ">=20"
   },
   "devDependencies": {
+    "eslint": "^8.57.1",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "prettier": "^2.8.8",
     "supertest": "^7.2.2"
   }
 }

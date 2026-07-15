@@ -8,6 +8,29 @@ on:
   workflow_dispatch:
 
 jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install API dependencies
+        working-directory: ./api
+        run: npm install --ignore-scripts
+      - name: Lint API
+        working-directory: ./api
+        run: npm run lint
+      - name: Install frontend dependencies
+        working-directory: ./frontend
+        run: npm install --ignore-scripts
+      - name: Lint frontend
+        working-directory: ./frontend
+        run: npm run lint
+
   api:
     name: API tests
     runs-on: ubuntu-latest
