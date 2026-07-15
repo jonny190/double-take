@@ -135,7 +135,6 @@ export default {
       if (item.command) {
         item.command({ originalEvent: e, item });
       }
-      // this.hide();
       this.isItemClicked = true;
       e.preventDefault();
     },

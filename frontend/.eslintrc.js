@@ -1,9 +1,14 @@
 module.exports = {
   root: true,
+  env: {
+    node: true,
+    browser: true,
+    es2021: true,
+  },
   parserOptions: {
     sourceType: 'module',
   },
-  extends: ['plugin:vue/vue3-essential', '@vue/prettier', '@vue/airbnb'],
+  extends: ['plugin:vue/vue3-essential', 'eslint:recommended'],
   rules: {
     // Only allow debugger in development
     'no-debugger': process.env.PRE_COMMIT ? 'error' : 'warn',

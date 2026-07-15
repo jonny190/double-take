@@ -42,31 +42,10 @@
     "@babel/eslint-parser": "^7.25.9",
     "@vitejs/plugin-vue": "^5.2.4",
     "@vue/compiler-sfc": "^3.5.13",
-    "@vue/eslint-config-airbnb": "^6.0.0",
-    "@vue/eslint-config-prettier": "^7.0.0",
     "eslint": "^8.57.1",
     "eslint-plugin-vue": "^9.32.0",
     "prettier": "^2.8.8",
     "sass": "^1.77.8",
     "vite": "^6.4.3"
-  },
-  "eslintConfig": {
-    "root": true,
-    "env": {
-      "node": true
-    },
-    "extends": [
-      "plugin:vue/vue3-essential",
-      "eslint:recommended"
-    ],
-    "parserOptions": {
-      "parser": "@babel/eslint-parser"
-    },
-    "rules": {}
-  },
-  "browserslist": [
-    "> 1%",
-    "last 2 versions",
-    "not dead"
-  ]
+  }
 }
