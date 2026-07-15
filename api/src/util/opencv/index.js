@@ -2,6 +2,11 @@ const { Canvas, Image, ImageData, loadImage } = require('canvas');
 const { JSDOM } = require('jsdom');
 const { OPENCV } = require('../../constants')();
 
+// this file's directory is mounted into the emscripten FS at OPENCV_MOUNT so
+// the cascade XML resolves regardless of the host process cwd
+const OPENCV_MOUNT = '/opencv';
+const CASCADE_PATH = `${OPENCV_MOUNT}/haarcascade_frontalface_default.xml`;
+
 let isLoaded = false;
 
 const installDOM = () => {
@@ -27,6 +32,10 @@ module.exports.load = (rootDir = '/work', localRootDir = process.cwd()) => {
   if (global.Module && global.Module.onRuntimeInitialized && global.cv && global.cv.imread) {
     return Promise.resolve();
   }
+  // lib.js is a large (~8.5MB) vendored emscripten build, so it is only
+  // require()d here - lazily, when a detector actually sets
+  // opencv_face_required - never at process start
+  console.verbose('loading opencv (opencv_face_required is set on a detector)');
   return new Promise((resolve) => {
     installDOM();
     global.Module = {
@@ -50,6 +59,10 @@ module.exports.load = (rootDir = '/work', localRootDir = process.cwd()) => {
         // FS.mount() is similar to Linux/POSIX mount operation. It basically mounts an external
         // filesystem with given format, in given current filesystem directory.
         FS.mount(global.Module.FS.filesystems.NODEFS, { root: localRootDir }, rootDir);
+        // also mount this module's own directory so the cascade XML loads by an
+        // absolute emscripten path independent of the host process cwd
+        if (!FS.analyzePath(OPENCV_MOUNT).exists) FS.mkdir(OPENCV_MOUNT);
+        FS.mount(global.Module.FS.filesystems.NODEFS, { root: __dirname }, OPENCV_MOUNT);
       },
     };
     global.cv = require('./lib');
@@ -69,7 +82,7 @@ module.exports.faceCount = async (path) => {
     cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY, 0);
     const faces = new cv.RectVector();
     const faceCascade = new cv.CascadeClassifier();
-    faceCascade.load('./api/src/util/opencv/haarcascade_frontalface_default.xml');
+    faceCascade.load(CASCADE_PATH);
     faceCascade.detectMultiScale(
       gray,
       faces,

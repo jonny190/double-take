@@ -136,8 +136,17 @@ Half of the bundled detectors point at abandoned upstreams.
   compressed). arm/v7 stays out of the matrix: official `node` images do ship
   arm/v7 variants, but `canvas` has no armhf prebuild, so restoring it means
   from-source compiles under QEMU.
-- ⬜ Reassess the bundled `opencv.js` emscripten blob — a large, optional,
-  hard-to-maintain artifact; gate or extract it.
+- ✅ Reassessed the bundled `opencv.js` emscripten blob (~8.5MB). It turned out
+  to already be well-gated: it is `require()`d lazily inside `opencv.load()`,
+  which `server.js` only calls when a detector sets `opencv_face_required`, so a
+  default install never loads it. As a vendored file (not an npm dep) it doesn't
+  touch `node_modules` or the dependency tree, so extraction buys little and was
+  skipped. Fixed a latent bug found while reviewing it: the Haar cascade was
+  loaded via a hardcoded `./api/src/...` path that only resolved when the
+  process cwd was the repo root; it now mounts the module's own directory into
+  the emscripten FS and loads by an absolute path, verified cwd-independent by
+  detecting a face in the bundled test image from a temp directory. Documented
+  the blob and its gating in CONTRIBUTING.
 
 ## Cross-cutting hardening (opportunistic)
 
