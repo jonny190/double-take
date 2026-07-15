@@ -101,7 +101,7 @@
         </div>
       </div>
     </div>
-    <div class="editor-wrapper" :style="{ height, marginTop: this.getStatusHeight() + 'px' }">
+    <div class="editor-wrapper" :style="{ height, marginTop: toolbarHeight + statusHeight + 'px' }">
       <div v-if="loading" class="p-d-flex p-jc-center" style="height: 100%">
         <i class="pi pi-spin pi-spinner p-as-center" style="font-size: 2.5rem"></i>
       </div>
@@ -240,16 +240,29 @@ export default {
     code: '',
     loading: false,
     height: 0,
+    statusHeight: 0,
   }),
   props: {
     toolbarHeight: Number,
     socket: Object,
+  },
+  watch: {
+    toolbarHeight() {
+      this.updateHeight();
+    },
   },
   created() {
     this.file = new URLSearchParams(window.location.search).get('file');
   },
   async mounted() {
     try {
+      // track the fixed status bar's real height; it changes as service
+      // statuses and detector states load in
+      this.statusObserver = new ResizeObserver(() => {
+        this.statusHeight = this.$refs.status ? this.$refs.status.clientHeight : 0;
+        this.updateHeight();
+      });
+      this.statusObserver.observe(this.$refs.status);
       this.updateHeight();
       await this.editorData();
       this.checkStatus();
@@ -292,6 +305,7 @@ export default {
   beforeUnmount() {
     window.removeEventListener('keydown', this.saveListener);
     window.removeEventListener('resize', this.updateHeight);
+    if (this.statusObserver) this.statusObserver.disconnect();
     clearInterval(this.statusInterval);
     PullToRefresh.destroyAll();
   },
@@ -357,9 +371,6 @@ export default {
 
       this.themes.editor = data.ui.editor.theme;
       this.themes.ui = data.ui.theme;
-    },
-    getStatusHeight() {
-      return this.$refs.status?.clientHeight;
     },
     reload() {
       window.location.reload();
@@ -463,7 +474,7 @@ export default {
       this.editor = editor;
     },
     updateHeight() {
-      this.height = `${window.innerHeight - this.getStatusHeight() - this.toolbarHeight}px`;
+      this.height = `${window.innerHeight - this.statusHeight - this.toolbarHeight}px`;
     },
     highlighter(code) {
       return highlight(code, languages.js);
