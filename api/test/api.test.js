@@ -72,3 +72,36 @@ test('tmp static route serves the URL shape built by mqtt/upload processing', as
     fs.rmSync(path.join(STORAGE.TMP.PATH, filename), { force: true });
   }
 });
+
+test('malformed JSON body does not leak error internals', async () => {
+  const res = await request(app)
+    .post('/api/recognize')
+    .set('content-type', 'application/json')
+    .send('{ not valid json');
+  assert.strictEqual(res.status, 400);
+  // the body must be exactly the sanitized shape, not the raw error object
+  // (which serializes the request body, type, and other internals)
+  assert.deepStrictEqual(Object.keys(res.body), ['error']);
+  assert.ok(!('body' in res.body) && !('type' in res.body));
+});
+
+test('no CORS header is sent in production', async () => {
+  // NODE_ENV is unset in tests, so the header should be present here; assert
+  // the app opts out under production instead
+  const original = process.env.NODE_ENV;
+  process.env.NODE_ENV = 'production';
+  delete require.cache[require.resolve('../src/app')];
+  const prodApp = require('../src/app');
+  try {
+    const res = await request(prodApp).get('/api/config/theme').set('origin', 'http://evil.example');
+    assert.strictEqual(res.headers['access-control-allow-origin'], undefined);
+  } finally {
+    process.env.NODE_ENV = original;
+    delete require.cache[require.resolve('../src/app')];
+  }
+});
+
+test('the SSRF-prone proxy endpoint is removed', async () => {
+  const res = await request(app).get('/api/proxy?url=http://169.254.169.254/');
+  assert.strictEqual(res.status, 404);
+});
