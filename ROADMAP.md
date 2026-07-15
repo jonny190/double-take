@@ -110,13 +110,15 @@ Half of the bundled detectors point at abandoned upstreams.
 
 ## Phase 5 — Runtime & packaging hygiene
 
-- ⬜ Move the Docker base off `ubuntu:20.04` (nearing EOL) to a current base or
-  a slim Node image (mind the `canvas` / `better-sqlite3` native build deps).
-  Note: arm/v7 images were dropped from the build matrix because NodeSource
-  ships no Node 20 packages for armhf on the current base. Official `node`
-  images still publish arm/v7 variants, so this migration could restore them
-  if 32-bit ARM is still worth supporting (expect slow QEMU builds and
-  from-source `canvas` compiles there).
+- ✅ Moved the Docker base from `ubuntu:20.04` (past EOL) to
+  `node:20-bookworm-slim` for both the production and dev images. No more
+  NodeSource script or compiler toolchain: `canvas`, `sharp`, and
+  `better-sqlite3` all install from prebuilt binaries on amd64/arm64.
+  Dependency layers now use `npm ci` with lockfiles, so they cache until a
+  lockfile changes. Image size dropped from 1.73GB to 547MB (415MB to 121MB
+  compressed). arm/v7 stays out of the matrix: official `node` images do ship
+  arm/v7 variants, but `canvas` has no armhf prebuild, so restoring it means
+  from-source compiles under QEMU.
 - ⬜ Reassess the bundled `opencv.js` emscripten blob — a large, optional,
   hard-to-maintain artifact; gate or extract it.
 
