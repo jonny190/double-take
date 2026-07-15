@@ -79,7 +79,7 @@ module.exports = {
   },
   ui: {
     path: '',
-    theme: 'bootstrap4-dark-blue',
+    theme: 'dark',
     editor: {
       theme: 'nord_dark',
     },

@@ -39,7 +39,6 @@
 /* eslint-disable no-unused-expressions */
 import Button from 'primevue/button';
 import Ripple from 'primevue/ripple';
-import { DomHandler } from 'primevue/utils';
 
 export default {
   name: 'SpeedDial',
@@ -110,8 +109,8 @@ export default {
   },
   mounted() {
     if (this.type !== 'linear') {
-      const button = DomHandler.findSingle(this.container, '.p-speeddial-button');
-      const firstItem = DomHandler.findSingle(this.list, '.p-speeddial-item');
+      const button = this.container.querySelector('.p-speeddial-button');
+      const firstItem = this.list.querySelector('.p-speeddial-item');
       if (button && firstItem) {
         const wDiff = Math.abs(button.offsetWidth - firstItem.offsetWidth);
         const hDiff = Math.abs(button.offsetHeight - firstItem.offsetHeight);

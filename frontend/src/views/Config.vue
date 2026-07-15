@@ -46,7 +46,7 @@
       <div class="p-d-flex p-ai-center p-mt-2 theme-holder">
         <div class="p-mr-2">
           <label class="p-d-block p-mb-1">UI Theme</label>
-          <Dropdown
+          <Select
             v-model="themes.ui"
             :options="options.ui"
             @before-hide="updateThemes('hide', true)"
@@ -55,7 +55,7 @@
         </div>
         <div class="p-mr-2">
           <label class="p-d-block p-mb-1">Editor Theme</label>
-          <Dropdown
+          <Select
             v-model="themes.editor"
             :options="options.editor"
             @before-hide="updateThemes('hide')"
@@ -131,7 +131,7 @@ import modeYamlUrl from 'ace-builds/src-noconflict/mode-yaml?url';
 import workerYamlUrl from 'ace-builds/src-noconflict/worker-yaml?url';
 
 import Button from 'primevue/button';
-import Dropdown from 'primevue/dropdown';
+import Select from 'primevue/select';
 import { highlight, languages } from 'prismjs/components/prism-core';
 import 'prismjs/components/prism-clike';
 import 'prismjs/components/prism-javascript';
@@ -161,7 +161,7 @@ export default {
   components: {
     VAceEditor,
     Button,
-    Dropdown,
+    Select,
   },
   data: () => ({
     file: 'config',
@@ -175,49 +175,7 @@ export default {
       editor: null,
     },
     options: {
-      ui: [
-        'arya-purple',
-        'arya-blue',
-        'arya-green',
-        'arya-orange',
-        'bootstrap4-dark-blue',
-        'bootstrap4-dark-purple',
-        'bootstrap4-light-blue',
-        'bootstrap4-light-purple',
-        'fluent-light',
-        'luna-amber',
-        'luna-blue',
-        'luna-green',
-        'luna-pink',
-        'md-dark-deeppurple',
-        'md-dark-indigo',
-        'md-light-deeppurple',
-        'md-light-indigo',
-        'mdc-dark-deeppurple',
-        'mdc-dark-indigo',
-        'mdc-light-deeppurple',
-        'mdc-light-indigo',
-        'mira',
-        'nano',
-        'nova',
-        'nova-accent',
-        'nova-alt',
-        'nova-vue',
-        'rhea',
-        'saga-blue',
-        'saga-green',
-        'saga-orange',
-        'saga-purple',
-        'soho-light',
-        'soho-dark',
-        'tailwind-light',
-        'vela-blue',
-        'vela-green',
-        'vela-orange',
-        'vela-purple',
-        'viva-light',
-        'viva-dark',
-      ],
+      ui: ['dark', 'light'],
       editor: [
         'ambiance',
         'chaos',
@@ -372,7 +330,7 @@ export default {
     },
     async updateThemes(type, reload) {
       try {
-        const panelVisible = document.getElementsByClassName('p-dropdown-panel').length;
+        const panelVisible = document.getElementsByClassName('p-select-overlay').length;
         if ((type === 'enter' && panelVisible) || this.themeUpdating) return;
         this.themeUpdating = true;
         if (reload === true) this.emitter.emit('appLoading', true);

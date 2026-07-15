@@ -110,7 +110,7 @@
         <div v-else-if="type === 'train'">
           <Badge value="untrained" severity="danger" class="p-mb-3" />
           <br />
-          <Dropdown v-model="folder" :options="folders" placeholder="move and train" :showClear="true" />
+          <Select v-model="folder" :options="folders" placeholder="move and train" :showClear="true" />
         </div>
       </template>
       <template v-slot:footer>
@@ -167,7 +167,7 @@ import Badge from 'primevue/badge';
 import Card from 'primevue/card';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
-import Dropdown from 'primevue/dropdown';
+import Select from 'primevue/select';
 
 import Time from '@/util/time.util';
 import Constants from '@/util/constants.util';
@@ -188,7 +188,7 @@ export default {
     Card,
     DataTable,
     Column,
-    Dropdown,
+    Select,
     Button,
     VLazyImage,
   },
