@@ -1,3 +1,10 @@
+## [1.14.5](https://github.com/jonny190/double-take/compare/v1.14.4...v1.14.5) (2026-07-15)
+
+
+### Build
+
+* **deps:** move the Docker base to node:20-bookworm-slim ([9647ec8](https://github.com/jonny190/double-take/commit/9647ec8febeafa9b8263b5a60839e68031173424))
+
 ## [1.14.4](https://github.com/jonny190/double-take/compare/v1.14.3...v1.14.4) (2026-07-15)
 
 
