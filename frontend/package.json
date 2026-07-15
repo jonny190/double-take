@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/jonny190/double-take#readme",
   "dependencies": {
+    "@primevue/themes": "^4.5.4",
     "ace-builds": "^1.36.5",
     "axios": "^1.7.9",
     "copy-to-clipboard": "^3.3.3",
@@ -27,7 +28,7 @@
     "mitt": "^3.0.1",
     "primeflex": "^2.0.0",
     "primeicons": "^5.0.0",
-    "primevue": "^3.53.0",
+    "primevue": "^4.5.4",
     "prismjs": "^1.29.0",
     "pulltorefreshjs": "^0.1.22",
     "socket.io-client": "^4.8.1",

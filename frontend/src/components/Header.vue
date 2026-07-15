@@ -20,7 +20,7 @@
     <div v-else class="p-d-flex p-jc-between">
       <div class="p-d-inline-flex p-ai-center">
         <div class="p-mr-2">
-          <Dropdown
+          <Select
             v-model="folder"
             :options="folders"
             :disabled="createFolder.loading"
@@ -279,7 +279,7 @@
 <script>
 import FileUpload from 'primevue/fileupload';
 import Button from 'primevue/button';
-import Dropdown from 'primevue/dropdown';
+import Select from 'primevue/select';
 import InputText from 'primevue/inputtext';
 import MultiSelect from 'primevue/multiselect';
 import SpeedDial from '@/components/SpeedDial.vue';
@@ -290,7 +290,7 @@ import ApiService from '@/services/api.service';
 export default {
   components: {
     Button,
-    Dropdown,
+    Select,
     InputText,
     MultiSelect,
     FileUpload,
@@ -409,7 +409,7 @@ export default {
     },
     fixSelectPanel(value, index) {
       const sub = document.getElementsByClassName('p-multiselect')[index];
-      const [panel] = document.getElementsByClassName('p-multiselect-panel');
+      const [panel] = document.getElementsByClassName('p-multiselect-overlay');
       if (panel && sub) {
         panel.style.position = value ? 'fixed' : 'absolute';
         panel.style.top = `${sub.getBoundingClientRect().bottom}px`;

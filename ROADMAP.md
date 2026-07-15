@@ -78,8 +78,16 @@ high-risk jumps. Tackle one at a time.
 - ✅ Joi 17 → 18 (API-compatible drop-in; the validation tests pass unchanged).
   Bumped `engines.node` to `>= 20` to match Joi 18's requirement (Node 18 is
   already EOL, and Docker/CI run 20).
-- ⬜ PrimeVue 3 → 4 (largest item — a full theming/component redesign; budget
-  real UI work).
+- ✅ PrimeVue 3 → 4. Adopted v4 styled mode with the **Lara preset** and a
+  `.dark`-class dark mode. Replaced the 40 downloadable theme-CSS files (and the
+  runtime `theme-link` swapping) with a simple **dark/light** picker; renamed
+  `Dropdown → Select`; inlined the removed `DomHandler.findSingle`; updated the
+  backend theme defaults/validation. **Verified in headless Chromium**: all views
+  render in both light and dark, the theme toggle works end-to-end, and there are
+  no console errors. (Some custom CSS still targets a few v3 component class
+  names that Lara restyles by default — cosmetic cleanup, tracked below.)
+- ⬜ Cosmetic follow-up: update remaining `.p-dropdown*` custom CSS selectors to
+  their v4 (`.p-select*`) equivalents.
 
 ## Phase 4 — Detector strategy
 

@@ -14,7 +14,6 @@
 import { io } from 'socket.io-client';
 import Toast from 'primevue/toast';
 import ConfirmDialog from 'primevue/confirmdialog';
-import 'primevue/resources/primevue.min.css';
 import 'primeflex/primeflex.css';
 import 'primeicons/primeicons.css';
 
@@ -94,28 +93,17 @@ export default {
       });
     },
     setTheme(newTheme) {
-      const theme = newTheme || localStorage.getItem('theme');
+      const theme = newTheme || localStorage.getItem('theme') || 'dark';
 
       if (theme === this.lastTheme) return;
-      if (document.getElementById('theme-link')) document.getElementById('theme-link').outerHTML = '';
-      document.getElementsByTagName('body')[0].className = 'overflow-hidden';
-      const themeLink = document.createElement('link');
-      themeLink.setAttribute('id', 'theme-link');
-      themeLink.setAttribute('rel', 'stylesheet');
-      themeLink.setAttribute('type', 'text/css');
-      themeLink.onload = () => {
-        this.setThemeColor();
-      };
-
-      themeLink.setAttribute('href', `./themes/${theme}/theme.css`);
+      // PrimeVue 4 styled mode: dark mode is a `.dark` class on <html>. Legacy
+      // theme names (e.g. "bootstrap4-dark-blue") map to dark unless they say
+      // "light"; new values are simply "dark" / "light".
+      const isDark = !/light/i.test(theme);
+      document.documentElement.classList.toggle('dark', isDark);
       localStorage.setItem('theme', theme);
       this.lastTheme = theme;
-
-      document.getElementsByTagName('head')[0].prepend(themeLink);
-      document.getElementsByTagName('body')[0].style.paddingTop = `${this.toolbarHeight}px`;
-      setTimeout(() => {
-        document.getElementsByTagName('body')[0].className = '';
-      }, 250);
+      this.$nextTick(() => this.setThemeColor());
     },
     rgbToHex(r, g, b) {
       return `#${[parseInt(r, 10), parseInt(g, 10), parseInt(b, 10)]
