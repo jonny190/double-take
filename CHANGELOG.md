@@ -1,3 +1,10 @@
+## [1.14.8](https://github.com/jonny190/double-take/compare/v1.14.7...v1.14.8) (2026-07-15)
+
+
+### Bug Fixes
+
+* **api:** patch two high-severity issues and credential leaks ([6807614](https://github.com/jonny190/double-take/commit/680761492a423038f86190e25e3577e1d0c90bff))
+
 ## [1.14.7](https://github.com/jonny190/double-take/compare/v1.14.6...v1.14.7) (2026-07-15)
 
 

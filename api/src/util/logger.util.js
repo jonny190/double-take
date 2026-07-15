@@ -58,7 +58,7 @@ module.exports.init = () => {
     mqtt.publish({
       topic: 'double-take/errors',
       message: isError
-        ? JSON.stringify(args[0], Object.getOwnPropertyNames(args[0]))
+        ? redact.string(JSON.stringify(args[0], Object.getOwnPropertyNames(args[0])))
         : JSON.stringify({ message }),
     });
   };

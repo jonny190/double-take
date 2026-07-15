@@ -108,6 +108,22 @@ test('the SSRF-prone proxy endpoint is removed', async () => {
   assert.strictEqual(res.status, 404);
 });
 
+// ensure a minimal index.html exists for the SPA-fallback tests to read
+const withIndexHtml = async (fn) => {
+  const distDir = path.join(process.cwd(), 'frontend', 'dist');
+  const indexPath = path.join(distDir, 'index.html');
+  const hadIndex = fs.existsSync(indexPath);
+  if (!hadIndex) {
+    fs.mkdirSync(distDir, { recursive: true });
+    fs.writeFileSync(indexPath, '<html><head></head><body></body></html>');
+  }
+  try {
+    await fn();
+  } finally {
+    if (!hadIndex) fs.rmSync(indexPath, { force: true });
+  }
+};
+
 test('security headers are sent (helmet)', async () => {
   const res = await request(app).get('/api/config/theme');
   // a couple of representative helmet defaults
@@ -123,14 +139,7 @@ test('security headers are sent (helmet)', async () => {
 });
 
 test('the injected bootstrap script carries the CSP nonce', async () => {
-  const distDir = path.join(process.cwd(), 'frontend', 'dist');
-  const indexPath = path.join(distDir, 'index.html');
-  const hadIndex = fs.existsSync(indexPath);
-  if (!hadIndex) {
-    fs.mkdirSync(distDir, { recursive: true });
-    fs.writeFileSync(indexPath, '<html><head></head><body></body></html>');
-  }
-  try {
+  await withIndexHtml(async () => {
     const res = await request(app).get('/');
     const headerNonce = (res.headers['content-security-policy'].match(/'nonce-([^']+)'/) || [])[1];
     assert.ok(headerNonce, 'nonce present in CSP header');
@@ -138,9 +147,17 @@ test('the injected bootstrap script carries the CSP nonce', async () => {
       res.text.includes(`<script nonce="${headerNonce}">`),
       'injected script uses the same nonce'
     );
-  } finally {
-    if (!hadIndex) fs.rmSync(indexPath, { force: true });
-  }
+  });
+});
+
+test('SPA fallback escapes x-ingress-path so it cannot break out of the inline script', async () => {
+  await withIndexHtml(async () => {
+    const payload = '</script><script>alert(1)</script>';
+    const res = await request(app).get('/').set('x-ingress-path', payload);
+    // the raw closing tag must not survive verbatim; it must be unicode-escaped
+    assert.ok(!res.text.includes('</script><script>alert(1)'), 'payload broke out of script');
+    assert.ok(res.text.includes('\\u003C'), 'value was escaped rather than dropped');
+  });
 });
 
 test('recognize GET caps attempts (rejects an absurd value)', async () => {
@@ -153,12 +170,31 @@ test('recognize GET blocks cloud-metadata SSRF targets', async () => {
   // passes Joi (valid uri) but the fetch layer must refuse the metadata IP;
   // with no detectors configured it would 400 "no detectors" AFTER routing,
   // so assert the process.util guard directly
-  const process = require('../src/util/process.util');
-  const valid = await process.isValidURL({
+  const proc = require('../src/util/process.util');
+  const valid = await proc.isValidURL({
     type: 'test',
     url: 'http://169.254.169.254/latest/meta-data/',
   });
   assert.strictEqual(valid, false);
-  const streamed = await process.stream('http://metadata.google.internal/computeMetadata/v1/');
+  const streamed = await proc.stream('http://metadata.google.internal/computeMetadata/v1/');
   assert.strictEqual(streamed, undefined);
+});
+
+test('storage delete rejects a key that escapes the media directory', async () => {
+  const database = require('../src/util/db.util');
+  await database.init();
+  const { STORAGE } = require('../src/constants')();
+  // a victim file outside the media root
+  const victim = path.join(os.tmpdir(), `dt-traversal-victim-${process.pid}.txt`);
+  fs.writeFileSync(victim, 'keep me');
+  const rel = path.relative(STORAGE.MEDIA.PATH, victim); // ../...
+  try {
+    await request(app)
+      .delete('/api/storage/train')
+      .set('content-type', 'application/json')
+      .send(JSON.stringify({ files: [{ id: 'x', key: rel }] }));
+    assert.ok(fs.existsSync(victim), 'out-of-bounds file was deleted (traversal not blocked)');
+  } finally {
+    fs.rmSync(victim, { force: true });
+  }
 });

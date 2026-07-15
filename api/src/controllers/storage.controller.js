@@ -1,4 +1,5 @@
 const fs = require('fs');
+const path = require('path');
 const axios = require('axios');
 const sharp = require('sharp');
 const sizeOf = require('probe-image-size');
@@ -116,6 +117,16 @@ module.exports.train = async (req, res) => {
   return filesystem.streamImage(res, source);
 };
 
+// resolve a client-supplied key under PATH and confirm it stays inside it, so
+// a key like "../../etc/x" cannot escape the media directory
+const resolveWithinMedia = (key) => {
+  if (typeof key !== 'string' || !key) return null;
+  const root = path.resolve(PATH);
+  const resolved = path.resolve(root, key);
+  if (resolved !== root && !resolved.startsWith(root + path.sep)) return null;
+  return resolved;
+};
+
 module.exports.delete = async (req, res) => {
   const { files } = req.body;
   if (files && files.length) {
@@ -124,7 +135,12 @@ module.exports.delete = async (req, res) => {
     db.prepare(`DELETE FROM file WHERE id IN (${database.params(ids)})`).run(ids);
     db.prepare(`DELETE FROM train WHERE fileId IN (${database.params(ids)})`).run(ids);
     files.forEach((obj) => {
-      filesystem.delete(`${PATH}/${obj.key}`);
+      const target = resolveWithinMedia(obj.key);
+      if (!target) {
+        console.warn(`storage delete: rejected out-of-bounds key: ${obj.key}`);
+        return;
+      }
+      filesystem.delete(target);
     });
   }
   res.send({ success: true });
