@@ -314,6 +314,8 @@ module.exports.recognize = (data) => {
         });
       }
     }, 30000);
+    // don't let the pending reset keep the process alive on shutdown
+    if (PERSON_RESET_TIMEOUT[camera].unref) PERSON_RESET_TIMEOUT[camera].unref();
   } catch (error) {
     error.message = `MQTT: recognize error: ${error.message}`;
     console.error(error);

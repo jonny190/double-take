@@ -43,10 +43,15 @@ refactors safe.
   auth enforcement, the path-traversal guard, rate-limit headers, and routing.
 - ✅ Add `ci.yml` running API tests and the frontend build on every PR and push
   to `master`/`beta`.
-- 🔨 Grow coverage: all five detector `normalize` functions are tested, and the
-  config loader is now covered (`!secret` resolution, defaults merging,
-  memoization, redaction). Still to do: detector HTTP calls (mocked) and MQTT
-  message handling.
+- ✅ Grow coverage: all five detector `normalize` functions are tested, the
+  config loader is covered (`!secret` resolution, defaults merging,
+  memoization, redaction), the HTTP detectors' request building is asserted via
+  an axios adapter stub (endpoint/method/auth for compreface, codeprojectai,
+  deepstack, facebox), and `mqtt.recognize()`'s publish payloads are covered
+  (person count, per-name match + Home Assistant discovery, unknown, topic
+  slugifying). Fixing the MQTT test also surfaced a real leak: the 30s
+  person-reset timer was not `unref()`-ed, so it kept the process alive on
+  shutdown.
 - ⬜ Add a lint/format gate once the existing source is brought fully
   Prettier/ESLint clean. `npm run lint` in `frontend/` now passes (the parser
   needed `requireConfigFile: false` after the Vite migration removed the babel
