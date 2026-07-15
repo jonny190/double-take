@@ -29,7 +29,8 @@ There's a lot of great open source software to perform facial recognition, but e
 
 - amd64
 - arm64
-- arm/v7
+
+arm/v7 images are no longer published: NodeSource provides no Node 20 packages for armhf, so the current image base cannot build them.
 
 ### Supported Detectors
 

@@ -105,6 +105,11 @@ Half of the bundled detectors point at abandoned upstreams.
 
 - ⬜ Move the Docker base off `ubuntu:20.04` (nearing EOL) to a current base or
   a slim Node image (mind the `canvas` / `better-sqlite3` native build deps).
+  Note: arm/v7 images were dropped from the build matrix because NodeSource
+  ships no Node 20 packages for armhf on the current base. Official `node`
+  images still publish arm/v7 variants, so this migration could restore them
+  if 32-bit ARM is still worth supporting (expect slow QEMU builds and
+  from-source `canvas` compiles there).
 - ⬜ Reassess the bundled `opencv.js` emscripten blob — a large, optional,
   hard-to-maintain artifact; gate or extract it.
 
