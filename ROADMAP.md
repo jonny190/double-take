@@ -124,10 +124,14 @@ Half of the bundled detectors point at abandoned upstreams.
 
 ## Cross-cutting hardening (opportunistic)
 
-- ⬜ Tighten the wide-open `app.use('*', cors())`.
-- ⬜ Stop the global error handler from serializing raw errors to clients
-  (`res.send(err)` leaks stack traces).
-- ⬜ Allowlist the `/proxy` SSRF endpoint (fetches arbitrary user-supplied URLs).
+- ✅ Restricted CORS to the dev server only. The UI is served same-origin by
+  the API, so production sends no `Access-Control-Allow-Origin` header.
+- ✅ Stopped the global error handler leaking internals. Pre-`respond`
+  middleware errors (e.g. a malformed JSON body) were sent with the native
+  `res.send`, serializing the raw error object; it now logs server-side and
+  returns only `{ error: message }`.
+- ✅ Removed the `/proxy` SSRF endpoint. It fetched arbitrary user-supplied
+  URLs and had no caller in the app, so it was removed rather than allowlisted.
 
 ---
 
