@@ -16,7 +16,7 @@
       </TabMenu>
     </div>
     <div v-if="updateAvailable" class="version p-ml-auto p-mr-2" v-tooltip.left="`Update Available`">
-      <div class="icon" @click="dockerHub"></div>
+      <div class="icon" @click="openReleases"></div>
     </div>
     <div class="double-take-menu-wrapper p-d-flex" @click="toggleMenu">
       <i class="pi p-mr-1 pi-angle-down p-as-center" style="height: 14px; overflow: hidden"></i>
@@ -87,6 +87,7 @@
 </template>
 
 <script>
+import axios from 'axios';
 import Menu from 'primevue/menu';
 import TabMenu from 'primevue/tabmenu';
 import Dialog from 'primevue/dialog';
@@ -173,7 +174,7 @@ export default {
       const obj = {
         label: `v${this.version}`,
         command: () => {
-          window.open('https://github.com/jakowenko/double-take');
+          window.open('https://github.com/jonny190/double-take');
         },
       };
 
@@ -224,38 +225,32 @@ export default {
       this.$refs.menu.toggle(event);
     },
     async checkVersion() {
-      if (this.version.includes('-')) {
-        try {
-          const sha7 = this.version.split('-').pop();
-          const { data: actions } = await ApiService.get(
-            'https://api.github.com/repos/jakowenko/double-take/actions/runs',
-          );
-          const [currentBuild] = actions.workflow_runs.filter((run) => run.head_sha.includes(sha7));
-          if (currentBuild) {
-            const tag = currentBuild.head_branch.includes('beta') ? 'beta' : 'latest';
-            const [lastBuild] = actions.workflow_runs.filter((run) =>
-              tag === 'latest'
-                ? !run.head_branch.includes('beta') &&
-                  run.name === 'build' &&
-                  run.status === 'completed' &&
-                  run.conclusion === 'success' &&
-                  run.name !== 'CodeQL'
-                : run.head_branch.includes('beta') &&
-                  run.name === 'build' &&
-                  run.status === 'completed' &&
-                  run.conclusion === 'success' &&
-                  run.name !== 'CodeQL',
-            );
-            if (currentBuild.id < lastBuild.id) this.updateAvailable = true;
-          }
-        } catch (error) {
-          this.emitter.emit('error', error);
-        }
-        if (!this.updateAvailable) setTimeout(this.checkVersion, 60000);
+      // production builds carry a "<version>-<sha7>" suffix; skip the check in dev
+      if (!this.version.includes('-')) return;
+      try {
+        const current = this.version.split('-')[0];
+        // plain axios: ApiService would attach the Double Take auth token,
+        // which GitHub rejects as bad credentials
+        const { data: release } = await axios.get('https://api.github.com/repos/jonny190/double-take/releases/latest', {
+          headers: { Accept: 'application/vnd.github+json' },
+        });
+        const latest = (release.tag_name || '').replace(/^v/, '');
+        if (latest && this.isNewerVersion(latest, current)) this.updateAvailable = true;
+      } catch (error) {
+        // best-effort check: rate limits or an offline host are not user-actionable
       }
+      if (!this.updateAvailable) setTimeout(this.checkVersion, 6 * 60 * 60 * 1000);
     },
-    dockerHub() {
-      window.open('https://hub.docker.com/r/jakowenko/double-take/tags?page=1&ordering=last_updated');
+    isNewerVersion(latest, current) {
+      const a = latest.split('.').map((part) => parseInt(part, 10) || 0);
+      const b = current.split('.').map((part) => parseInt(part, 10) || 0);
+      for (let i = 0; i < 3; i += 1) {
+        if ((a[i] || 0) !== (b[i] || 0)) return (a[i] || 0) > (b[i] || 0);
+      }
+      return false;
+    },
+    openReleases() {
+      window.open('https://github.com/jonny190/double-take/releases');
     },
   },
   watch: {
