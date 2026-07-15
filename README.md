@@ -1,8 +1,10 @@
-[![Double Take](https://badgen.net/github/release/jakowenko/double-take/stable)](https://github.com/jakowenko/double-take) [![Double Take](https://badgen.net/github/stars/jakowenko/double-take)](https://github.com/jakowenko/double-take/stargazers) [![Docker Pulls](https://flat.badgen.net/docker/pulls/jakowenko/double-take)](https://hub.docker.com/r/jakowenko/double-take) [![Discord](https://flat.badgen.net/discord/members/3pumsskdN5?label=Discord)](https://discord.gg/3pumsskdN5)
+[![Release](https://badgen.net/github/release/jonny190/double-take/stable)](https://github.com/jonny190/double-take/releases) [![Stars](https://badgen.net/github/stars/jonny190/double-take)](https://github.com/jonny190/double-take/stargazers) [![Image](https://badgen.net/badge/ghcr.io/double-take/blue)](https://github.com/jonny190/double-take/pkgs/container/double-take)
 
 # Double Take
 
 Unified UI and API for processing and training images for facial recognition.
+
+This is a maintained fork of [jakowenko/double-take](https://github.com/jakowenko/double-take) by David Jakowenko, picked up after a long upstream gap. See [ROADMAP.md](ROADMAP.md) for what has changed and [CONTRIBUTING.md](CONTRIBUTING.md) for the maintainer's guide.
 
 <p align="center">
   <img src="https://user-images.githubusercontent.com/1081811/126434926-cf2275f7-f3a8-43eb-adc2-903c0071f7d1.jpg" width="100%">
@@ -34,11 +36,18 @@ arm/v7 images are no longer published: NodeSource provides no Node 20 packages f
 
 ### Supported Detectors
 
-- [CompreFace](https://github.com/exadel-inc/CompreFace)
-- [Amazon Rekognition](https://aws.amazon.com/rekognition)
-- [CodeProject.AI](https://www.codeproject.com/AI/index.aspx)
-- [DeepStack](https://deepstack.cc) (discontinued upstream — use CodeProject.AI, its API-compatible successor)
-- [Facebox](https://machinebox.io) (discontinued upstream)
+Recommended, in order:
+
+- [CompreFace](https://github.com/exadel-inc/CompreFace) — self-hosted, free, Apache-2.0. The most complete match for Double Take's feature set. Note that upstream has been quiet since late 2023, but it still runs well and is the default recommendation for a self-hosted setup.
+- [Amazon Rekognition](https://aws.amazon.com/rekognition) — cloud, paid, no self-hosting. A solid option if you would rather not run a detector yourself.
+- [CodeProject.AI](https://www.codeproject.com/AI/index.aspx) — self-hosted, free. The API-compatible successor to DeepStack; still works, though releases have slowed (latest is late 2024).
+
+Legacy (kept working for existing setups, not recommended for new installs):
+
+- [DeepStack](https://github.com/johnolafenwa/DeepStack) — discontinued upstream (no release since early 2022); use CodeProject.AI instead.
+- [Facebox](https://machinebox.io) — discontinued upstream.
+
+> **Using Frigate?** Frigate 0.16 (August 2025) added its own fully-local face recognition that needs no external service. It covers the common "recognize faces on Frigate cameras" case on its own. Double Take is still useful for training and managing faces through a UI, aggregating multiple detectors, and processing non-Frigate image sources. If you run both, disable Double Take's `frigate.update_sub_labels` (see below), since Frigate's built-in recognition and Double Take both write camera sub labels and will otherwise conflict.
 
 ### Supported NVRs
 
@@ -232,22 +241,20 @@ auth: true
 
 ## API
 
-Documentation can be viewed on [Postman](https://documenter.getpostman.com/view/1013188/TzsWuAa8).
+The original API reference lives on [Postman](https://documenter.getpostman.com/view/1013188/TzsWuAa8) (upstream's collection; still broadly accurate). The routes are defined under [`api/src/routes`](api/src/routes) if you need the authoritative list for this fork.
 
 ## Usage
 
 ### Docker Compose
 
 ```yaml
-version: '3.7'
-
 volumes:
   double-take:
 
 services:
   double-take:
     container_name: double-take
-    image: ghcr.io/jonny190/double-take
+    image: ghcr.io/jonny190/double-take:latest
     restart: unless-stopped
     volumes:
       - double-take:/.storage
@@ -689,6 +696,6 @@ compreface_key: <api-key>
 ./.develop/build
 ```
 
-## Donations
+## Credits
 
-If you would like to make a donation to support development, please use [GitHub Sponsors](https://github.com/sponsors/jakowenko).
+Double Take was created by [David Jakowenko](https://github.com/jakowenko). If you would like to support the original author's work, see their [GitHub Sponsors](https://github.com/sponsors/jakowenko) page.
