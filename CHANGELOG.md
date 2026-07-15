@@ -1,3 +1,23 @@
+## [1.14.0](https://github.com/jonny190/double-take/compare/v1.13.2...v1.14.0) (2026-07-15)
+
+
+### Features
+
+* **api:** add CodeProject.AI detector support ([38d58f8](https://github.com/jonny190/double-take/commit/38d58f83aae3bf0339b5e433d16013249e9fbf04))
+* **api:** upgrade to Express 5 ([1874ed7](https://github.com/jonny190/double-take/commit/1874ed7548ff9b4d5f2101fae9e836fe523745ed))
+
+
+### Bug Fixes
+
+* **api:** add rate limiting to filesystem/storage routes ([d140d9f](https://github.com/jonny190/double-take/commit/d140d9fcbb1dbee54c2c19bca158e15f140dadf1))
+* **api:** patch SQL injection, path traversal, and CI issues ([1e504dc](https://github.com/jonny190/double-take/commit/1e504dce88ce8b2ecd450a16e1f568a612dd8f60))
+
+
+### Build
+
+* **frontend:** migrate from vue-cli to Vite ([25a9906](https://github.com/jonny190/double-take/commit/25a9906991351885cdce91c6de4a6da7a06716db))
+* **frontend:** migrate to PrimeVue 4 ([b71bc23](https://github.com/jonny190/double-take/commit/b71bc234b45b21692e680cf3c01c8f287e9da9c3))
+
 ## [1.13.2](https://github.com/jakowenko/double-take/compare/v1.13.1...v1.13.2) (2025-08-18)
 
 
