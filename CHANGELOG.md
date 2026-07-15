@@ -1,3 +1,10 @@
+## [1.14.6](https://github.com/jonny190/double-take/compare/v1.14.5...v1.14.6) (2026-07-15)
+
+
+### Bug Fixes
+
+* **api:** security hardening (error leaks, CORS, SSRF proxy) ([0f8b449](https://github.com/jonny190/double-take/commit/0f8b449c89256a4109f216aed9b1925e884d854d))
+
 ## [1.14.5](https://github.com/jonny190/double-take/compare/v1.14.4...v1.14.5) (2026-07-15)
 
 
