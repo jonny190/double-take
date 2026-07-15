@@ -1,3 +1,11 @@
+## [1.14.1](https://github.com/jonny190/double-take/compare/v1.14.0...v1.14.1) (2026-07-15)
+
+
+### Bug Fixes
+
+* **api:** disable telemetry by default ([11ff34a](https://github.com/jonny190/double-take/commit/11ff34ae07dd071d37c74cefa90deecb18218e9b))
+* **frontend:** stop the fixed header overlapping content under PrimeVue 4 ([16902bc](https://github.com/jonny190/double-take/commit/16902bc2f7b008130fe76d040c9494b37517da26))
+
 ## [1.14.0](https://github.com/jonny190/double-take/compare/v1.13.2...v1.14.0) (2026-07-15)
 
 
