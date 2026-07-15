@@ -71,3 +71,17 @@ test('redact-secrets: masks sensitive keys, leaves others', () => {
   assert.strictEqual(out.token, '********');
   assert.strictEqual(out.camera, 'front');
 });
+
+test('redact-secrets: scrubs credentials embedded in URL values', () => {
+  // credentials in a value under a non-sensitive key name must still be masked
+  const out = redact({ url: 'http://user:s3cret@cam.local/snap.jpg?api_key=ABC123' });
+  assert.ok(!/s3cret|ABC123/.test(out.url), 'URL creds leaked');
+  assert.ok(out.url.includes('user:********@'), 'userinfo not masked');
+  assert.ok(out.url.includes('api_key=********'), 'query secret not masked');
+});
+
+test('redact-secrets: .string scrubs a bare credentialed URL', () => {
+  const out = redact.string('url validation failed: http://x/a?token=deadbeef - image/jpeg');
+  assert.ok(!out.includes('deadbeef'), 'token leaked in message string');
+  assert.ok(out.includes('token=********'));
+});

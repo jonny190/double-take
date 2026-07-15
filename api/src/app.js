@@ -21,14 +21,25 @@ app.use(
 );
 app.use(`${UI.PATH}/api`, require('./routes'));
 
+// JSON.stringify alone yields a valid JS string but is NOT safe to embed in an
+// inline <script>: a value like `</script>...` would terminate the block.
+// Escape the characters that can break out of the script/HTML context, plus the
+// JS line separators U+2028/U+2029 (legal in JSON, illegal in a JS string).
+const LINE_SEPARATORS = new RegExp(`[${String.fromCharCode(0x2028, 0x2029)}]`, 'g');
+const embedInScript = (value) =>
+  JSON.stringify(value ?? '')
+    .replace(/</g, '\\u003C')
+    .replace(/>/g, '\\u003E')
+    .replace(/&/g, '\\u0026')
+    .replace(LINE_SEPARATORS, (c) => `\\u${c.charCodeAt(0).toString(16).padStart(4, '0')}`);
+
 app.use(mount, (req, res) => {
   const html = fs.readFileSync(
     `${process.cwd()}/frontend/${process.env.NODE_ENV === 'production' ? '' : 'dist/'}index.html`,
     'utf8'
   );
-  // Safely serialize values to prevent XSS
-  const ingressUrlSafe = JSON.stringify(req.headers['x-ingress-path'] || '');
-  const publicPathSafe = JSON.stringify(UI?.PATH || '');
+  const ingressUrlSafe = embedInScript(req.headers['x-ingress-path']);
+  const publicPathSafe = embedInScript(UI?.PATH);
   res.send(
     html.replace(
       '</head>',

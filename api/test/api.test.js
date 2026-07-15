@@ -107,3 +107,42 @@ test('the SSRF-prone proxy endpoint is removed', async () => {
   const res = await request(app).get('/api/proxy?url=http://169.254.169.254/');
   assert.strictEqual(res.status, 404);
 });
+
+test('SPA fallback escapes x-ingress-path so it cannot break out of the inline script', async () => {
+  // build a minimal index.html for the fallback to read
+  const distDir = path.join(process.cwd(), 'frontend', 'dist');
+  const indexPath = path.join(distDir, 'index.html');
+  const hadIndex = fs.existsSync(indexPath);
+  if (!hadIndex) {
+    fs.mkdirSync(distDir, { recursive: true });
+    fs.writeFileSync(indexPath, '<html><head></head><body></body></html>');
+  }
+  try {
+    const payload = '</script><script>alert(1)</script>';
+    const res = await request(app).get('/').set('x-ingress-path', payload);
+    // the raw closing tag must not survive verbatim; it must be unicode-escaped
+    assert.ok(!res.text.includes('</script><script>alert(1)'), 'payload broke out of script');
+    assert.ok(res.text.includes('\\u003C'), 'value was escaped rather than dropped');
+  } finally {
+    if (!hadIndex) fs.rmSync(indexPath, { force: true });
+  }
+});
+
+test('storage delete rejects a key that escapes the media directory', async () => {
+  const database = require('../src/util/db.util');
+  await database.init();
+  const { STORAGE } = require('../src/constants')();
+  // a victim file outside the media root
+  const victim = path.join(os.tmpdir(), `dt-traversal-victim-${process.pid}.txt`);
+  fs.writeFileSync(victim, 'keep me');
+  const rel = path.relative(STORAGE.MEDIA.PATH, victim); // ../...
+  try {
+    await request(app)
+      .delete('/api/storage/train')
+      .set('content-type', 'application/json')
+      .send(JSON.stringify({ files: [{ id: 'x', key: rel }] }));
+    assert.ok(fs.existsSync(victim), 'out-of-bounds file was deleted (traversal not blocked)');
+  } finally {
+    fs.rmSync(victim, { force: true });
+  }
+});
