@@ -301,11 +301,12 @@ a.update.visible {
   overflow: hidden;
 }
 
-::v-deep(.p-tabmenu) .p-tabmenu-nav {
+::v-deep(.p-tabmenu) .p-tabmenu-tablist {
   border: none;
+  background: transparent;
 }
 
-::v-deep(.p-tabmenu) .p-tabmenuitem .p-menuitem-link {
+::v-deep(.p-tabmenu) .p-tabmenu-item .p-tabmenu-item-link {
   padding: 0.55rem 1rem;
   background: none;
   border: none;
@@ -321,11 +322,11 @@ a.update.visible {
   }
 }
 
-::v-deep(.p-tabmenu) .p-tabmenuitem:not(.p-highlight):not(.p-disabled):hover .p-menuitem-link {
+::v-deep(.p-tabmenu) .p-tabmenu-item:not(.p-tabmenu-item-active):not(.p-disabled):hover .p-tabmenu-item-link {
   background: none;
 }
 
-::v-deep(.p-tabmenu) .p-tabmenuitem .p-menuitem-link {
+::v-deep(.p-tabmenu) .p-tabmenu-item .p-tabmenu-item-link {
   box-shadow: 0 0 0 0 rgba(0, 0, 0, 0) !important;
   -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
 }

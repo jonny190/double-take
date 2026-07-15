@@ -48,8 +48,10 @@ refactors safe.
   memoization, redaction). Still to do: detector HTTP calls (mocked) and MQTT
   message handling.
 - ⬜ Add a lint/format gate once the existing source is brought fully
-  Prettier/ESLint clean (a repo-wide check is red today on legacy files, so it
-  was intentionally left out of the initial CI to keep it green).
+  Prettier/ESLint clean. `npm run lint` in `frontend/` now passes (the parser
+  needed `requireConfigFile: false` after the Vite migration removed the babel
+  config, plus a handful of small source fixes); the API side still needs the
+  same treatment before a CI gate makes sense.
 
 ## Phase 2 — Frontend build tooling: vue-cli → Vite
 
@@ -86,8 +88,13 @@ high-risk jumps. Tackle one at a time.
   render in both light and dark, the theme toggle works end-to-end, and there are
   no console errors. (Some custom CSS still targets a few v3 component class
   names that Lara restyles by default — cosmetic cleanup, tracked below.)
-- ⬜ Cosmetic follow-up: update remaining `.p-dropdown*` custom CSS selectors to
-  their v4 (`.p-select*`) equivalents.
+- ✅ Cosmetic follow-up: swept the remaining v3 class names in custom CSS to
+  their v4 equivalents (`.p-dropdown*` -> `.p-select*`, TabMenu's
+  `.p-tabmenuitem .p-menuitem-link` -> `.p-tabmenu-item-link`, Menu's
+  `.p-menuitem*`/`.p-submenu-header` -> `.p-menu-item*`/`.p-menu-submenu-label`),
+  and fixed the fixed-header layout: view content now pads for the toolbar plus
+  header stack, with heights tracked live via ResizeObserver instead of a
+  one-shot measurement at mount.
 
 ## Phase 4 — Detector strategy
 
@@ -124,6 +131,9 @@ Half of the bundled detectors point at abandoned upstreams.
 
 ## Already shipped in this fork
 
+- Telemetry now defaults to off: the upstream endpoint (`api.double-take.io`)
+  is unreachable, so the default only produced browser console errors and a
+  pointless hourly heartbeat.
 - Security fixes: parameterized a SQL-injection-prone delete, path-traversal
   guards on filesystem/storage/train routes, rate limiting on the disk-reading
   endpoints.

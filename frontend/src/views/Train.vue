@@ -1,5 +1,5 @@
 <template>
-  <div class="train-wrapper" :style="{ paddingTop: headerHeight + 'px' }">
+  <div class="train-wrapper" :style="{ paddingTop: toolbarHeight + headerHeight + 'px' }">
     <Header
       type="train"
       :loading="loading"
@@ -143,10 +143,15 @@ export default {
     emitters.forEach((emitter) => {
       this.emitter.off(emitter);
     });
+    if (this.headerObserver) this.headerObserver.disconnect();
     PullToRefresh.destroyAll();
   },
   async mounted() {
-    this.headerHeight = this.$refs.header.getHeight();
+    // track the fixed header's real height (fonts, async styles, resizes)
+    this.headerObserver = new ResizeObserver(() => {
+      this.headerHeight = this.$refs.header ? this.$refs.header.getHeight() : 0;
+    });
+    this.headerObserver.observe(this.$refs.header.$el);
     this.init();
     PullToRefresh.init({
       mainElement: '#pull-to-reload-message',

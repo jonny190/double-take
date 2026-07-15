@@ -87,6 +87,8 @@ module.exports = {
       parserOptions: {
         parser: '@babel/eslint-parser',
         sourceType: 'module',
+        // no babel config exists since the Vite migration; parse without one
+        requireConfigFile: false,
       },
       env: {
         browser: true,
