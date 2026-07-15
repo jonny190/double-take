@@ -128,9 +128,7 @@ import ace from 'ace-builds';
 import { VAceEditor } from 'vue3-ace-editor';
 // not duplicates: the bare import eagerly registers the yaml mode, while the
 // ?url variant is a Vite asset URL handed to ace's dynamic module loader
-// eslint-disable-next-line import/no-duplicates
 import 'ace-builds/src-noconflict/mode-yaml';
-// eslint-disable-next-line import/no-duplicates
 import modeYamlUrl from 'ace-builds/src-noconflict/mode-yaml?url';
 import workerYamlUrl from 'ace-builds/src-noconflict/worker-yaml?url';
 
