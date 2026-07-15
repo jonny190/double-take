@@ -14,7 +14,7 @@ There's a lot of great open source software to perform facial recognition, but e
 
 ## Features
 
-- Responsive UI and API bundled into single [Docker image](https://hub.docker.com/r/jakowenko/double-take)
+- Responsive UI and API bundled into single [Docker image](https://github.com/jonny190/double-take/pkgs/container/double-take)
 - Ability to [password protect](#authentication) UI and API
 - Support for [multiple detectors](#supported-detectors)
 - Train and untrain images for subjects
@@ -246,7 +246,7 @@ volumes:
 services:
   double-take:
     container_name: double-take
-    image: jakowenko/double-take
+    image: ghcr.io/jonny190/double-take
     restart: unless-stopped
     volumes:
       - double-take:/.storage
