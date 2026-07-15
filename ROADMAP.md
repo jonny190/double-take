@@ -26,11 +26,13 @@ Make the fork actually build, ship, and point at the right place.
   example in `README.md` points at the GHCR image. One-time follow-up after the
   first push: set the package to public in its GitHub package settings and link
   it to the repo.
-- ⬜ Confirm `release.yml` (semantic-release) works on the fork; it currently
-  expects a `PAT` secret. Consider falling back to `GITHUB_TOKEN` with
-  `contents: write` if release automation isn't needed to trigger downstream
-  builds.
-- ⬜ Refresh `README.md` install instructions and image references to the fork.
+- ✅ Confirmed `release.yml` (semantic-release) works on the fork: with the
+  `PAT` secret set it has cut every release from v1.14.0 onward, each
+  triggering the GHCR image build.
+- ✅ Refreshed `README.md` for the fork: badges point at the fork's releases
+  and GHCR package (dropped the upstream Docker Hub / Discord badges), the
+  compose example uses the GHCR image, a fork note credits the original author,
+  and the donations section now frames sponsorship as supporting upstream.
 
 ## Phase 1 — Safety net (tests + CI)
 
@@ -110,8 +112,18 @@ Half of the bundled detectors point at abandoned upstreams.
   `normalize` unit test.
 - ✅ Flag **DeepStack** and **Facebox** as discontinued upstream in the docs.
 - ⬜ Consider fully removing Facebox in a future major.
-- ⬜ Lead docs with **CompreFace** (actively maintained, self-hosted) and AWS
-  Rekognition (cloud) as the primary options.
+- ✅ Reworked the README detector section to lead with **CompreFace** and AWS
+  **Rekognition**, then CodeProject.AI, with DeepStack/Facebox demoted to a
+  "legacy" group. Added honest maintenance-status notes (a mid-2026 research
+  pass found every self-hosted DeepStack/CompreFace-style backend is now
+  dormant or quiet) and a note that **Frigate 0.16**'s native face recognition
+  covers the common Frigate-only case without Double Take, with the
+  `update_sub_labels` conflict called out.
+- ✅ Evaluated adding a new detector (mid-2026 research). Conclusion: no
+  compelling drop-in exists. Actively-maintained engines (InsightFace-REST,
+  Immich) return raw embeddings or have no standalone recognition API, so they
+  do not match either normalized shape and would need new client-side matching
+  logic. Not worth adding now; documented the landscape instead.
 
 ## Phase 5 — Runtime & packaging hygiene
 
