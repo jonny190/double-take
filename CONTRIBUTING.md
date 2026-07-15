@@ -129,6 +129,18 @@ Adding a detector: create `util/detectors/<name>.js` (see `codeprojectai.js`
 for a template), register it in `util/detectors/index.js`, add its defaults to
 `constants/defaults.js`, extend `schemas/index.js`, and add a `normalize` test.
 
+## OpenCV pre-filter
+
+`util/opencv/lib.js` is a large (~8.5MB) vendored emscripten build of OpenCV,
+with `haarcascade_frontalface_default.xml` alongside it. It powers the optional
+"require a face before hitting the detector" pre-filter. It is **only loaded
+when a detector sets `opencv_face_required: true`** — `constants/config.js`
+computes that flag, `server.js` calls `opencv.load()` only when it is set, and
+the blob itself is `require()`d lazily inside `load()`, so a default install
+never pays for it. Because it is a vendored file (not an npm dependency) it
+doesn't affect `node_modules` or the dependency tree; it just sits in the repo
+and image. Kept as-is for that reason rather than extracted.
+
 ## Conventions
 
 - Match the surrounding code style; Prettier + ESLint configs are in-repo.
