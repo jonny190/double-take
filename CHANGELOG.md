@@ -1,3 +1,10 @@
+## [1.14.2](https://github.com/jonny190/double-take/compare/v1.14.1...v1.14.2) (2026-07-15)
+
+
+### Bug Fixes
+
+* **frontend:** restore menu navigation and config page layout ([277fd9d](https://github.com/jonny190/double-take/commit/277fd9dad8e1fbba440ca863421fb4805632c0de))
+
 ## [1.14.1](https://github.com/jonny190/double-take/compare/v1.14.0...v1.14.1) (2026-07-15)
 
 
