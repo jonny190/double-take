@@ -54,7 +54,9 @@ const processMessage = ({ topic, message }) => {
       url: `http://0.0.0.0:${SERVER.PORT}${UI.PATH}/api/recognize`,
       headers: AUTH ? { authorization: jwt.sign({ route: 'recognize' }) } : null,
       params: {
-        url: `http://0.0.0.0:${SERVER.PORT}${UI.PATH}/api/${STORAGE.TMP.PATH}/${filename}`,
+        // STORAGE.TMP.PATH is absolute: joining with a bare "/api" avoids a
+        // double slash, which Express 5 no longer matches against the mount
+        url: `http://0.0.0.0:${SERVER.PORT}${UI.PATH}/api${STORAGE.TMP.PATH}/${filename}`,
         type: 'mqtt',
         camera,
       },
