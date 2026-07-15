@@ -28,7 +28,8 @@ router
         type: Joi.string().default('manual'),
         camera: Joi.string().default('manual'),
         url: Joi.string().uri().required(),
-        attempts: Joi.number().integer().default(1).min(1),
+        // cap attempts so a single request can't spin the fetch loop unbounded
+        attempts: Joi.number().integer().default(1).min(1).max(100),
       },
     }),
     controller.start

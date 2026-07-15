@@ -13,6 +13,28 @@ const { SERVER, STORAGE, UI } = require('../constants')();
 const DETECTORS = require('../constants/config').detectors();
 const config = require('../constants/config');
 
+// Cloud instance-metadata endpoints are a classic SSRF escalation target and
+// have no legitimate use as a camera/image source. Block them outright while
+// leaving normal LAN camera URLs and the internal self-fetch working. This is
+// a targeted guard, not a full private-range block (which would break LAN
+// cameras and the API's own 0.0.0.0 self-requests).
+const BLOCKED_HOSTS = new Set([
+  '169.254.169.254', // AWS/Azure/GCP/DO/Alibaba IMDS (link-local)
+  'metadata.google.internal',
+  'metadata.goog',
+  '100.100.200.200', // Alibaba
+  'fd00:ec2::254', // AWS IMDSv6
+]);
+
+const isBlockedTarget = (url) => {
+  try {
+    const { hostname } = new URL(url);
+    return BLOCKED_HOSTS.has(hostname.toLowerCase());
+  } catch (error) {
+    return false;
+  }
+};
+
 module.exports.polling = async (
   event,
   { retries, id, type, url, breakMatch, MATCH_IDS, delay }
@@ -176,6 +198,10 @@ module.exports.process = async ({ camera, detector, tmp, errors }) => {
 
 module.exports.isValidURL = async ({ auth = false, type, url }) => {
   const validOptions = ['image/jpg', 'image/jpeg', 'image/png'];
+  if (isBlockedTarget(url)) {
+    console.error(`url validation error: blocked SSRF target: ${url}`);
+    return false;
+  }
   try {
     const isDigest = digest.exists(url) || auth === 'digest';
     const digestAuth = isDigest ? digest(parse.url(url)) : false;
@@ -203,6 +229,10 @@ module.exports.isValidURL = async ({ auth = false, type, url }) => {
 };
 
 module.exports.stream = async (url) => {
+  if (isBlockedTarget(url)) {
+    console.error(`stream error: blocked SSRF target: ${url}`);
+    return undefined;
+  }
   try {
     const isDigest = digest.exists(url);
     const digestAuth = isDigest ? digest(isDigest) : false;

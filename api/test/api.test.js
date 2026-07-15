@@ -107,3 +107,32 @@ test('the SSRF-prone proxy endpoint is removed', async () => {
   const res = await request(app).get('/api/proxy?url=http://169.254.169.254/');
   assert.strictEqual(res.status, 404);
 });
+
+test('security headers are sent (helmet)', async () => {
+  const res = await request(app).get('/api/config/theme');
+  // a couple of representative helmet defaults
+  assert.strictEqual(res.headers['x-content-type-options'], 'nosniff');
+  assert.ok(res.headers['x-dns-prefetch-control'], 'helmet headers present');
+  // relaxed CORP so HA can embed images cross-origin
+  assert.strictEqual(res.headers['cross-origin-resource-policy'], 'cross-origin');
+});
+
+test('recognize GET caps attempts (rejects an absurd value)', async () => {
+  const res = await request(app).get('/api/recognize?url=http://x/y.jpg&attempts=999999');
+  assert.strictEqual(res.status, 422);
+  assert.ok(Array.isArray(res.body.errors));
+});
+
+test('recognize GET blocks cloud-metadata SSRF targets', async () => {
+  // passes Joi (valid uri) but the fetch layer must refuse the metadata IP;
+  // with no detectors configured it would 400 "no detectors" AFTER routing,
+  // so assert the process.util guard directly
+  const process = require('../src/util/process.util');
+  const valid = await process.isValidURL({
+    type: 'test',
+    url: 'http://169.254.169.254/latest/meta-data/',
+  });
+  assert.strictEqual(valid, false);
+  const streamed = await process.stream('http://metadata.google.internal/computeMetadata/v1/');
+  assert.strictEqual(streamed, undefined);
+});

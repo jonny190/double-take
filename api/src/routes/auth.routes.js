@@ -1,13 +1,20 @@
 const express = require('express');
 const { jwt, setup, validate, Joi } = require('../middlewares');
+const { login: loginRateLimit } = require('../middlewares/rate-limit');
 const controller = require('../controllers/auth.controller');
 
 const router = express.Router();
 
 router
-  .post('/', validate({ body: { password: Joi.string().min(1).required() } }), controller.login)
+  .post(
+    '/',
+    loginRateLimit,
+    validate({ body: { password: Joi.string().min(1).required() } }),
+    controller.login
+  )
   .post(
     '/password',
+    loginRateLimit,
     validate({ body: { password: Joi.string().min(1).required() } }),
     setup,
     controller.password

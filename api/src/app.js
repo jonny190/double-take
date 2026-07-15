@@ -1,11 +1,25 @@
 const express = require('express');
 const fs = require('fs');
 const cors = require('cors');
+const helmet = require('helmet');
 const { UI } = require('./constants')();
 
 const app = express();
 // Express 5 requires a valid path pattern; an empty UI.PATH mounts at root.
 const mount = UI.PATH || '/';
+// security headers. CSP is left off: the SPA relies on an inline bootstrap
+// <script> (the ingress injection below) and PrimeVue's runtime-injected
+// styles, which a default CSP would block - enabling it needs per-release
+// tuning and is tracked separately. crossOriginResourcePolicy is relaxed to
+// cross-origin so match/latest images can still be embedded by Home Assistant
+// notifications on another origin.
+app.use(
+  helmet({
+    contentSecurityPolicy: false,
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+    crossOriginEmbedderPolicy: false,
+  })
+);
 // the UI is served same-origin by this API; cross-origin browser access is
 // only needed by the vite dev server, so production sends no CORS headers
 if (process.env.NODE_ENV !== 'production') app.use(cors());
