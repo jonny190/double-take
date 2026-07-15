@@ -91,18 +91,25 @@ Commits follow [Conventional Commits](https://www.conventionalcommits.org/)
 `master`/`beta` to bump the version, update `CHANGELOG.md`, and cut a GitHub
 release, which triggers `build.yml`.
 
-`build.yml` runs on this fork and **builds** the image on every release. It
-only **pushes** once Docker credentials are configured — until then the build
-just validates. To publish:
+`build.yml` publishes images to **GHCR** (`ghcr.io/jonny190/double-take`) using
+the built-in `GITHUB_TOKEN`, so no registry account or extra secrets are
+needed. Releases from `master` push `:latest` and `:<version>` (multi-arch);
+releases from `beta` push `:beta` (amd64 only). Notes:
 
-- **Docker Hub:** add `DOCKER_USERNAME` / `DOCKER_PASSWORD` secrets. The image
-  name defaults to the GitHub repo (`owner/name`); override with a
-  `DOCKER_IMAGE` repository variable if your namespace differs.
-- **GHCR (recommended for a fork):** publish to `ghcr.io/<owner>/double-take`
-  using the built-in `GITHUB_TOKEN` — no extra account needed. (Wiring this up
-  is a small change to `build.yml`; see `ROADMAP.md`.)
+- The first push creates the package as **private**. To allow public pulls,
+  set it to public once in the package settings on GitHub (Packages ->
+  double-take -> Package settings -> Change visibility) and link it to the
+  repo.
+- The image name (registry included) can be overridden with a `DOCKER_IMAGE`
+  repository variable, but the login step in `build.yml` targets `ghcr.io`, so
+  pushing elsewhere also requires adjusting the login.
+- A `workflow_dispatch` run from a branch other than `master`/`beta` builds
+  without pushing (validation only).
 
-`release.yml` uses a `PAT` secret so the release can trigger the image build.
+`release.yml` uses a `PAT` secret so the release it creates can trigger the
+image build; events created with the built-in `GITHUB_TOKEN` do not start
+other workflows, so the PAT is required for the release -> build chain to
+work.
 
 ## How processing works (quick tour)
 

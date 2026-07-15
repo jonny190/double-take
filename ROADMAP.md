@@ -20,12 +20,12 @@ Make the fork actually build, ship, and point at the right place.
   `homepage` to the fork (original author credit retained).
 - ✅ Make `build.yml` run on this fork instead of being gated to the upstream
   repo; image name defaults to the GitHub repo and is overridable with a
-  `DOCKER_IMAGE` repository variable; Docker push is skipped gracefully until
-  `DOCKER_USERNAME` / `DOCKER_PASSWORD` secrets are set (the image still builds
-  in CI for validation).
-- ⬜ Add the publishing secrets, or switch the registry to GHCR
-  (`ghcr.io/<owner>/double-take`) using the built-in `GITHUB_TOKEN` — no extra
-  account needed, a good default for a fork.
+  `DOCKER_IMAGE` repository variable.
+- ✅ Publish images to GHCR (`ghcr.io/jonny190/double-take`) using the built-in
+  `GITHUB_TOKEN`, so no registry account or secrets are needed. The compose
+  example in `README.md` points at the GHCR image. One-time follow-up after the
+  first push: set the package to public in its GitHub package settings and link
+  it to the repo.
 - ⬜ Confirm `release.yml` (semantic-release) works on the fork; it currently
   expects a `PAT` secret. Consider falling back to `GITHUB_TOKEN` with
   `contents: write` if release automation isn't needed to trigger downstream
