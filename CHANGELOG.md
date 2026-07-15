@@ -1,3 +1,10 @@
+## [1.14.4](https://github.com/jonny190/double-take/compare/v1.14.3...v1.14.4) (2026-07-15)
+
+
+### Bug Fixes
+
+* **api:** restore MQTT snapshot and manual upload processing under Express 5 ([385ee4b](https://github.com/jonny190/double-take/commit/385ee4ba5e4a090fab3c771a8ea6b2a221577b88))
+
 ## [1.14.3](https://github.com/jonny190/double-take/compare/v1.14.2...v1.14.3) (2026-07-15)
 
 
