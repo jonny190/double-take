@@ -1,3 +1,10 @@
+## [1.14.3](https://github.com/jonny190/double-take/compare/v1.14.2...v1.14.3) (2026-07-15)
+
+
+### Bug Fixes
+
+* **frontend:** stop update checker spamming GitHub with doomed requests ([7f06309](https://github.com/jonny190/double-take/commit/7f06309497d4655377f514c25db8af0f7b37c614))
+
 ## [1.14.2](https://github.com/jonny190/double-take/compare/v1.14.1...v1.14.2) (2026-07-15)
 
 
