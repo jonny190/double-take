@@ -14,3 +14,15 @@ module.exports = rateLimit({
   legacyHeaders: false,
   validate: { trustProxy: false },
 });
+
+// Tight limiter for the unauthenticated login endpoint to bound password
+// brute-forcing. Generous enough for a human fat-fingering their password,
+// tight enough that automated guessing is impractical. Same proxy-agnostic
+// stance as above.
+module.exports.login = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 20,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  validate: { trustProxy: false },
+});

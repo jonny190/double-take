@@ -108,8 +108,8 @@ test('the SSRF-prone proxy endpoint is removed', async () => {
   assert.strictEqual(res.status, 404);
 });
 
-test('SPA fallback escapes x-ingress-path so it cannot break out of the inline script', async () => {
-  // build a minimal index.html for the fallback to read
+// ensure a minimal index.html exists for the SPA-fallback tests to read
+const withIndexHtml = async (fn) => {
   const distDir = path.join(process.cwd(), 'frontend', 'dist');
   const indexPath = path.join(distDir, 'index.html');
   const hadIndex = fs.existsSync(indexPath);
@@ -118,14 +118,66 @@ test('SPA fallback escapes x-ingress-path so it cannot break out of the inline s
     fs.writeFileSync(indexPath, '<html><head></head><body></body></html>');
   }
   try {
+    await fn();
+  } finally {
+    if (!hadIndex) fs.rmSync(indexPath, { force: true });
+  }
+};
+
+test('security headers are sent (helmet)', async () => {
+  const res = await request(app).get('/api/config/theme');
+  // a couple of representative helmet defaults
+  assert.strictEqual(res.headers['x-content-type-options'], 'nosniff');
+  assert.ok(res.headers['x-dns-prefetch-control'], 'helmet headers present');
+  // relaxed CORP so HA can embed images cross-origin
+  assert.strictEqual(res.headers['cross-origin-resource-policy'], 'cross-origin');
+  // a CSP is enforced (not disabled), with a per-request nonce for scripts
+  const csp = res.headers['content-security-policy'];
+  assert.ok(csp, 'CSP header present');
+  assert.ok(/script-src[^;]*'nonce-/.test(csp), 'script-src carries a nonce');
+  assert.ok(/frame-ancestors 'self'/.test(csp), 'frame-ancestors set');
+});
+
+test('the injected bootstrap script carries the CSP nonce', async () => {
+  await withIndexHtml(async () => {
+    const res = await request(app).get('/');
+    const headerNonce = (res.headers['content-security-policy'].match(/'nonce-([^']+)'/) || [])[1];
+    assert.ok(headerNonce, 'nonce present in CSP header');
+    assert.ok(
+      res.text.includes(`<script nonce="${headerNonce}">`),
+      'injected script uses the same nonce'
+    );
+  });
+});
+
+test('SPA fallback escapes x-ingress-path so it cannot break out of the inline script', async () => {
+  await withIndexHtml(async () => {
     const payload = '</script><script>alert(1)</script>';
     const res = await request(app).get('/').set('x-ingress-path', payload);
     // the raw closing tag must not survive verbatim; it must be unicode-escaped
     assert.ok(!res.text.includes('</script><script>alert(1)'), 'payload broke out of script');
     assert.ok(res.text.includes('\\u003C'), 'value was escaped rather than dropped');
-  } finally {
-    if (!hadIndex) fs.rmSync(indexPath, { force: true });
-  }
+  });
+});
+
+test('recognize GET caps attempts (rejects an absurd value)', async () => {
+  const res = await request(app).get('/api/recognize?url=http://x/y.jpg&attempts=999999');
+  assert.strictEqual(res.status, 422);
+  assert.ok(Array.isArray(res.body.errors));
+});
+
+test('recognize GET blocks cloud-metadata SSRF targets', async () => {
+  // passes Joi (valid uri) but the fetch layer must refuse the metadata IP;
+  // with no detectors configured it would 400 "no detectors" AFTER routing,
+  // so assert the process.util guard directly
+  const proc = require('../src/util/process.util');
+  const valid = await proc.isValidURL({
+    type: 'test',
+    url: 'http://169.254.169.254/latest/meta-data/',
+  });
+  assert.strictEqual(valid, false);
+  const streamed = await proc.stream('http://metadata.google.internal/computeMetadata/v1/');
+  assert.strictEqual(streamed, undefined);
 });
 
 test('storage delete rejects a key that escapes the media directory', async () => {
