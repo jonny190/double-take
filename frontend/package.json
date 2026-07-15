@@ -1,6 +1,6 @@
 {
   "name": "double-take-frontend",
-  "version": "1.14.8",
+  "version": "1.14.9",
   "description": "Unified UI and API for processing and training images for facial recognition",
   "scripts": {
     "serve": "vite",

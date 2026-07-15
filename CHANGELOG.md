@@ -1,3 +1,11 @@
+## [1.14.9](https://github.com/jonny190/double-take/compare/v1.14.8...v1.14.9) (2026-07-15)
+
+
+### Bug Fixes
+
+* **api:** add a real Content-Security-Policy (addresses CodeQL alert) ([6910159](https://github.com/jonny190/double-take/commit/69101596cd383b3105191bdf89bc9f050c7376bf))
+* **api:** security hardening (headers, login rate-limit, SSRF, DoS bounds) ([915e618](https://github.com/jonny190/double-take/commit/915e618f3f4a18f3efbbae9393c78e60c1cee637))
+
 ## [1.14.8](https://github.com/jonny190/double-take/compare/v1.14.7...v1.14.8) (2026-07-15)
 
 
