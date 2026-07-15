@@ -115,6 +115,32 @@ test('security headers are sent (helmet)', async () => {
   assert.ok(res.headers['x-dns-prefetch-control'], 'helmet headers present');
   // relaxed CORP so HA can embed images cross-origin
   assert.strictEqual(res.headers['cross-origin-resource-policy'], 'cross-origin');
+  // a CSP is enforced (not disabled), with a per-request nonce for scripts
+  const csp = res.headers['content-security-policy'];
+  assert.ok(csp, 'CSP header present');
+  assert.ok(/script-src[^;]*'nonce-/.test(csp), 'script-src carries a nonce');
+  assert.ok(/frame-ancestors 'self'/.test(csp), 'frame-ancestors set');
+});
+
+test('the injected bootstrap script carries the CSP nonce', async () => {
+  const distDir = path.join(process.cwd(), 'frontend', 'dist');
+  const indexPath = path.join(distDir, 'index.html');
+  const hadIndex = fs.existsSync(indexPath);
+  if (!hadIndex) {
+    fs.mkdirSync(distDir, { recursive: true });
+    fs.writeFileSync(indexPath, '<html><head></head><body></body></html>');
+  }
+  try {
+    const res = await request(app).get('/');
+    const headerNonce = (res.headers['content-security-policy'].match(/'nonce-([^']+)'/) || [])[1];
+    assert.ok(headerNonce, 'nonce present in CSP header');
+    assert.ok(
+      res.text.includes(`<script nonce="${headerNonce}">`),
+      'injected script uses the same nonce'
+    );
+  } finally {
+    if (!hadIndex) fs.rmSync(indexPath, { force: true });
+  }
 });
 
 test('recognize GET caps attempts (rejects an absurd value)', async () => {
