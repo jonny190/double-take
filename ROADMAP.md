@@ -43,9 +43,10 @@ refactors safe.
   auth enforcement, the path-traversal guard, rate-limit headers, and routing.
 - ✅ Add `ci.yml` running API tests and the frontend build on every PR and push
   to `master`/`beta`.
-- 🔨 Grow coverage: all five detector `normalize` functions are now tested
-  (compreface, deepstack, codeprojectai, facebox, rekognition). Still to do:
-  detector HTTP calls (mocked), MQTT message handling, and the config loader.
+- 🔨 Grow coverage: all five detector `normalize` functions are tested, and the
+  config loader is now covered (`!secret` resolution, defaults merging,
+  memoization, redaction). Still to do: detector HTTP calls (mocked) and MQTT
+  message handling.
 - ⬜ Add a lint/format gate once the existing source is brought fully
   Prettier/ESLint clean (a repo-wide check is red today on legacy files, so it
   was intentionally left out of the initial CI to keep it green).
