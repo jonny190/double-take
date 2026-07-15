@@ -58,7 +58,11 @@ export default {
     this.addAnalytics();
   },
   mounted() {
-    this.toolbarHeight = this.$refs.toolbar.getHeight();
+    // track the fixed toolbar's real height (fonts, async styles, resizes)
+    this.toolbarObserver = new ResizeObserver(() => {
+      this.toolbarHeight = this.$refs.toolbar ? this.$refs.toolbar.getHeight() : 0;
+    });
+    this.toolbarObserver.observe(this.$refs.toolbar.$el);
     this.$nextTick(() => {
       setTimeout(() => {
         this.loaded = true;
@@ -259,11 +263,11 @@ body {
   }
 }
 
-.p-dropdown .p-dropdown-trigger {
+.p-select .p-select-dropdown {
   width: 2rem;
 }
 
-.p-multiselect .p-multiselect-trigger {
+.p-multiselect .p-multiselect-dropdown {
   width: 2rem;
 }
 
@@ -319,16 +323,16 @@ body {
   width: 175px;
   margin-top: 2px;
 
-  .p-submenu-header,
-  a.p-menuitem-link {
+  .p-menu-submenu-label,
+  .p-menu-item-link {
     padding: 0.5rem 1rem;
   }
 
-  .p-submenu-header {
+  .p-menu-submenu-label {
     display: none;
   }
 
-  .p-menuitem:nth-child(2) a {
+  .p-menu-item:nth-child(2) .p-menu-item-link {
     font-weight: bold;
     font-size: 0.75rem;
   }
@@ -351,14 +355,14 @@ body {
   }
 }
 
-.p-multiselect-panel .p-multiselect-items {
+.p-multiselect-overlay .p-multiselect-list {
   font-size: 0.9rem;
   @media only screen and (max-width: 576px) {
     font-size: 0.9rem;
   }
 }
 
-.p-dropdown-panel {
+.p-select-overlay {
   font-size: 0.9rem;
   @media only screen and (max-width: 576px) {
     font-size: 0.9rem;

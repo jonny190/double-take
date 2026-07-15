@@ -26,6 +26,7 @@
             :disabled="createFolder.loading"
             :showClear="true"
             :class="{ train: type === 'train' }"
+            aria-label="folder"
           />
         </div>
         <div v-if="type === 'match' && !folder">
@@ -681,7 +682,7 @@ export default {
     }
   }
 
-  .p-dropdown {
+  .p-select {
     width: 175px;
     @media only screen and (max-width: 768px) {
       &.train {
@@ -693,7 +694,7 @@ export default {
         width: 135px;
       }
     }
-    ::v-deep(.p-inputtext) {
+    ::v-deep(.p-select-label) {
       font-size: 0.9rem;
       @media only screen and (max-width: 576px) {
         font-size: 1rem;

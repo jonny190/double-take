@@ -1,5 +1,5 @@
 <template>
-  <div class="match-wrapper" :style="{ paddingTop: headerHeight + filterBarHeight + 'px' }">
+  <div class="match-wrapper" :style="{ paddingTop: toolbarHeight + headerHeight + filterBarHeight + 'px' }">
     <Header
       type="match"
       :loading="loading"
@@ -131,7 +131,11 @@ export default {
         },
       });
 
-      this.headerHeight = this.$refs.header.getHeight();
+      // track the fixed header's real height (fonts, async styles, resizes)
+      this.headerObserver = new ResizeObserver(() => {
+        this.headerHeight = this.$refs.header ? this.$refs.header.getHeight() : 0;
+      });
+      this.headerObserver.observe(this.$refs.header.$el);
       if (this.socket) {
         this.socket.on('recognize', (/* message */) => {
           if (this.socketEnabled) this.get().matches();
@@ -155,6 +159,7 @@ export default {
     emitters.forEach((emitter) => {
       this.emitter.off(emitter);
     });
+    if (this.headerObserver) this.headerObserver.disconnect();
     PullToRefresh.destroyAll();
   },
   created() {
