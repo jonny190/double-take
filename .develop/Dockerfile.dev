@@ -1,32 +1,18 @@
-FROM ubuntu:20.04 as build
+FROM node:20-bookworm-slim
 ARG DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update && apt-get install -y curl bash
-RUN curl -sL https://deb.nodesource.com/setup_20.x | bash -
-RUN apt-get install -y nodejs gcc g++ make libpixman-1-dev libcairo2-dev libpango1.0-dev libjpeg8-dev libgif-dev
-
+# the dev compose stack bind-mounts the repo over /double-take (keeping the
+# container's api/frontend node_modules via anonymous volumes), so this image
+# only pre-installs dependencies
 WORKDIR /double-take/api
-COPY /api/package.json .
-RUN npm install --production
+COPY api/package.json api/package-lock.json ./
+RUN npm ci --omit=dev
 
 WORKDIR /double-take/frontend
-COPY /frontend/package.json .
-RUN npm install
+COPY frontend/package.json frontend/package-lock.json ./
+RUN npm ci
 
-WORKDIR /double-take/api
-COPY /api/server.js .
-COPY /api/src ./src
+RUN mkdir /.storage && ln -s /.storage /double-take/.storage
 
-WORKDIR /double-take/frontend
-COPY /frontend/src ./src
-COPY /frontend/public ./public
-COPY /frontend/vite.config.js /frontend/index.html ./
-
-WORKDIR /
-RUN mkdir /.storage
-RUN ln -s /.storage /double-take/.storage
-
-FROM ubuntu:20.04
-COPY --from=build . .
 ENV NODE_ENV=development
 WORKDIR /double-take

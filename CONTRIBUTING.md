@@ -14,7 +14,7 @@ modernization plan see [`ROADMAP.md`](./ROADMAP.md).
 | Frontend | Vue 3 + Vite 6, PrimeVue 4 (Lara preset), PrimeFlex |
 | Validation | Joi 18 (requests) + jsonschema (config) |
 | Detectors | CompreFace, CodeProject.AI, DeepStack, Facebox, AWS Rekognition |
-| Packaging | Docker (multi-arch), semantic-release |
+| Packaging | Docker (`node:20-bookworm-slim`, amd64/arm64), semantic-release |
 
 ## Repository layout
 
@@ -38,8 +38,10 @@ ROADMAP.md      phased modernization plan
 
 ## Local development
 
-Requirements: Node 20+, and the native build deps for `canvas`
-(`libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev`).
+Requirements: Node 20+. The native modules (`canvas`, `sharp`,
+`better-sqlite3`) install from prebuilt binaries on common platforms; you only
+need the `canvas` build deps (`libcairo2-dev libpango1.0-dev libjpeg-dev
+libgif-dev librsvg2-dev`) if no prebuild exists for yours.
 
 ```bash
 # API (port 3000)
