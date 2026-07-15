@@ -55,3 +55,20 @@ test('folders list returns an array', async () => {
   assert.strictEqual(res.status, 200);
   assert.ok(Array.isArray(res.body));
 });
+
+test('tmp static route serves the URL shape built by mqtt/upload processing', async () => {
+  // mqtt.util and recognize.controller hand the API a self-referential URL of
+  // the form /api<STORAGE.TMP.PATH>/<file>; Express 5 will not match the mount
+  // if that join produces a double slash, silently breaking snapshot and
+  // manual-upload processing
+  const { STORAGE } = require('../src/constants')();
+  fs.mkdirSync(STORAGE.TMP.PATH, { recursive: true });
+  const filename = 'route-shape-test.jpg';
+  fs.writeFileSync(path.join(STORAGE.TMP.PATH, filename), 'not-really-a-jpg');
+  try {
+    const res = await request(app).get(`/api${STORAGE.TMP.PATH}/${filename}`);
+    assert.strictEqual(res.status, 200);
+  } finally {
+    fs.rmSync(path.join(STORAGE.TMP.PATH, filename), { force: true });
+  }
+});
