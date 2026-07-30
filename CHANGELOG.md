@@ -1,3 +1,10 @@
+## [1.14.10](https://github.com/jonny190/double-take/compare/v1.14.9...v1.14.10) (2026-07-30)
+
+
+### Bug Fixes
+
+* **frontend:** show a newly created train folder without a page refresh ([336b479](https://github.com/jonny190/double-take/commit/336b479119ad18367c16b5bda6be5e082902629b))
+
 ## [1.14.9](https://github.com/jonny190/double-take/compare/v1.14.8...v1.14.9) (2026-07-15)
 
 
