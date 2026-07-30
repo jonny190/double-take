@@ -13,7 +13,9 @@ process.env.CONFIG_PATH = path.join(base, 'config');
 process.env.SECRETS_PATH = path.join(base, 'config');
 process.env.MEDIA_PATH = base;
 
+const { Readable } = require('stream');
 const DigestAuth = require('../src/util/digest.util');
+const filesystem = require('../src/util/fs.util');
 
 const { md5, parseChallenge } = DigestAuth;
 const { jwt } = require('../src/util/auth.util');
@@ -84,4 +86,30 @@ test('redact-secrets: .string scrubs a bare credentialed URL', () => {
   const out = redact.string('url validation failed: http://x/a?token=deadbeef - image/jpeg');
   assert.ok(!out.includes('deadbeef'), 'token leaked in message string');
   assert.ok(out.includes('token=********'));
+});
+
+test('fs.writerStream resolves on a successful write', async () => {
+  const dest = path.join(base, 'writer-ok.txt');
+  await filesystem.writerStream(Readable.from(['hello']), dest);
+  assert.strictEqual(fs.readFileSync(dest, 'utf8'), 'hello');
+});
+
+test('fs.writerStream rejects (does not hang) when the destination is unwritable', async () => {
+  // an unwritable destination (a path whose parent does not exist) must make
+  // the returned promise reject rather than hang forever, so save() settles
+  const dest = path.join(base, 'no-such-dir', 'x.txt');
+  await assert.rejects(
+    () => filesystem.writerStream(Readable.from(['data']), dest),
+    /writer error/
+  );
+});
+
+test('fs.writerStream rejects when the source stream errors', async () => {
+  const dest = path.join(base, 'writer-src-err.txt');
+  const src = new Readable({
+    read() {
+      this.destroy(new Error('boom'));
+    },
+  });
+  await assert.rejects(() => filesystem.writerStream(src, dest), /read stream error/);
 });

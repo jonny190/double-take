@@ -111,7 +111,14 @@ module.exports.connect = () => {
       .on('offline', () => logStatus('offline', console.error))
       .on('disconnect', () => logStatus('disconnected', console.error))
       .on('reconnect', () => logStatus('reconnecting', console.warn))
-      .on('message', async (topic, message) => processMessage({ topic, message }).init());
+      .on('message', async (topic, message) => {
+        try {
+          await processMessage({ topic, message }).init();
+        } catch (error) {
+          error.message = `MQTT: message error: ${error.message}`;
+          console.error(error);
+        }
+      });
   } catch (error) {
     logStatus(error.message, console.error);
   }

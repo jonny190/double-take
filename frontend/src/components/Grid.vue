@@ -3,7 +3,7 @@
     <div class="p-grid p-nogutter">
       <div class="p-col-12">
         <div class="p-grid p-ai-center">
-          <div v-for="(asset, index) in matches.source" class="p-col-12 p-sm-6 p-md-4 p-lg-3" :key="asset">
+          <div v-for="(asset, index) in matches.source" class="p-col-12 p-sm-6 p-md-4 p-lg-3" :key="asset.id">
             <Asset
               :type="type"
               :asset="asset"

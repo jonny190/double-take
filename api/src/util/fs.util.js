@@ -81,15 +81,21 @@ module.exports.writer = async (file, data) => {
 };
 
 module.exports.writerStream = async (stream, file) => {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     const out = fs.createWriteStream(file);
+    // reject (rather than log-and-hang) so the awaiting caller settles; the
+    // caller (process.util save()) already logs via its try/catch
+    stream.on('error', (error) => {
+      out.destroy();
+      reject(new Error(`writer read stream error: ${error.message}`));
+    });
     stream.pipe(out);
     out
       .on('finish', () => {
         resolve();
       })
       .on('error', (error) => {
-        console.error(`writer error: ${error.message}`);
+        reject(new Error(`writer error: ${error.message}`));
       });
   });
 };
