@@ -14,7 +14,7 @@
             ></i>
           </div>
           <div class="selected-overlay" :class="{ selected: selected }"></div>
-          <div v-for="detector in results" :key="detector">
+          <div v-for="(detector, index) in results" :key="index">
             <div
               v-if="detector.box !== undefined && loaded"
               :class="'box ' + detector.detector"
@@ -91,7 +91,7 @@
           </DataTable>
         </div>
         <div v-if="type === 'train' && asset.results.length">
-          <div v-for="(detection, index) in asset.results" :key="detection" class="p-d-inline-block badge-holder">
+          <div v-for="(detection, index) in asset.results" :key="index" class="p-d-inline-block badge-holder">
             <Badge
               :value="detection.detector"
               :severity="
@@ -127,13 +127,13 @@
               <Badge v-if="asset.camera" :value="asset.camera" />
               <Badge v-if="asset.type && asset.type !== 'manual'" :value="asset.type" />
               <Badge v-if="asset.zones.length" :value="[...asset.zones].join(', ')" />
-              <div v-for="gender in genders" :key="gender" class="badge-holder p-d-inline-block">
+              <div v-for="(gender, index) in genders" :key="index" class="badge-holder p-d-inline-block">
                 <Badge :value="gender.value + ': ' + gender.probability + '%'" />
               </div>
-              <div v-for="age in ages" :key="age" class="badge-holder p-d-inline-block">
+              <div v-for="(age, index) in ages" :key="index" class="badge-holder p-d-inline-block">
                 <Badge :value="age.low + '-' + age.high + ': ' + age.probability + '%'" />
               </div>
-              <div v-for="mask in masks" :key="mask" class="badge-holder p-d-inline-block">
+              <div v-for="(mask, index) in masks" :key="index" class="badge-holder p-d-inline-block">
                 <Badge :value="mask.value.replace(/_/g, ' ') + ': ' + mask.probability + '%'" />
               </div>
             </div>
@@ -207,9 +207,16 @@ export default {
     src: null,
   }),
   created() {
-    setInterval(() => {
+    // refresh the relative "ago" labels; 30s is plenty for a minutes-ago
+    // display and avoids a per-second reactive tick on every card
+    this.agoInterval = setInterval(() => {
       this.timestamp = Date.now();
-    }, 1000);
+    }, 30000);
+  },
+  beforeUnmount() {
+    // clear the timer so destroyed cards (pagination/filter/socket churn)
+    // don't leave intervals firing against dead components
+    clearInterval(this.agoInterval);
   },
   methods: {
     constants: () => ({
