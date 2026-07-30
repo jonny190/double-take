@@ -46,25 +46,31 @@ const processMessage = ({ topic, message }) => {
     const { ATTEMPTS } = foundCamera ? { ATTEMPTS: { MQTT: true } } : config.frigate({ camera });
 
     if (!ATTEMPTS.MQTT || PREVIOUS_MQTT_LENGTHS.includes(buffer.length)) return;
+    // record + trim the dedup window before the await so it never transiently
+    // exceeds the bound while a self-fetch is in flight
     PREVIOUS_MQTT_LENGTHS.unshift(buffer.length);
+    PREVIOUS_MQTT_LENGTHS = PREVIOUS_MQTT_LENGTHS.slice(0, 10);
 
     fs.writer(`${STORAGE.TMP.PATH}/${filename}`, buffer);
-    await axios({
-      method: 'get',
-      url: `http://0.0.0.0:${SERVER.PORT}${UI.PATH}/api/recognize`,
-      headers: AUTH ? { authorization: jwt.sign({ route: 'recognize' }) } : null,
-      params: {
-        // STORAGE.TMP.PATH is absolute: joining with a bare "/api" avoids a
-        // double slash, which Express 5 no longer matches against the mount
-        url: `http://0.0.0.0:${SERVER.PORT}${UI.PATH}/api${STORAGE.TMP.PATH}/${filename}`,
-        type: 'mqtt',
-        camera,
-      },
-      validateStatus: () => true,
-    });
-    fs.delete(`${STORAGE.TMP.PATH}/${filename}`, buffer);
-    // only store last 10 mqtt lengths
-    PREVIOUS_MQTT_LENGTHS = PREVIOUS_MQTT_LENGTHS.slice(0, 10);
+    try {
+      await axios({
+        method: 'get',
+        url: `http://0.0.0.0:${SERVER.PORT}${UI.PATH}/api/recognize`,
+        headers: AUTH ? { authorization: jwt.sign({ route: 'recognize' }) } : null,
+        params: {
+          // STORAGE.TMP.PATH is absolute: joining with a bare "/api" avoids a
+          // double slash, which Express 5 no longer matches against the mount
+          url: `http://0.0.0.0:${SERVER.PORT}${UI.PATH}/api${STORAGE.TMP.PATH}/${filename}`,
+          type: 'mqtt',
+          camera,
+        },
+        validateStatus: () => true,
+      });
+    } finally {
+      // always clean up the temp snapshot, even if the self-fetch throws at
+      // the transport level (e.g. ECONNREFUSED while the server is restarting)
+      fs.delete(`${STORAGE.TMP.PATH}/${filename}`);
+    }
   };
 
   const frigate = async () => {
@@ -127,6 +133,15 @@ module.exports.connect = () => {
 module.exports.available = async (state) => {
   if (CLIENT) this.publish({ topic: 'double-take/available', retain: true, message: state });
 };
+
+module.exports.disconnect = () =>
+  new Promise((resolve) => {
+    if (!CLIENT) {
+      resolve();
+      return;
+    }
+    CLIENT.end(false, {}, () => resolve());
+  });
 
 module.exports.subscribe = () => {
   const topics = [];

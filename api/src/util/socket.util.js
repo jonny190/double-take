@@ -13,3 +13,12 @@ module.exports.connect = (server) => {
 };
 
 module.exports.emit = (event, message) => (io ? io.emit(event, message) : false);
+
+module.exports.close = () =>
+  new Promise((resolve) => {
+    if (!io) {
+      resolve();
+      return;
+    }
+    io.close(() => resolve());
+  });

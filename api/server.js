@@ -27,11 +27,12 @@ module.exports.start = async () => {
   storage.purge();
   socket.connect(server);
   heartbeat.cron();
+  // hand the http server to the shutdown handler so it can close it on a signal
+  shutdown.listen(server);
 };
 
 try {
   this.start().catch((error) => console.error(error));
-  shutdown.listen();
 } catch (error) {
   console.error(error);
 }

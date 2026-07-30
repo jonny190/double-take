@@ -307,11 +307,18 @@ export default {
     },
   },
   watch: {
-    folder(value) {
-      if (value) {
-        const { id } = this.asset;
-        ApiService.patch(`train/${id}`, { name: value });
+    async folder(value) {
+      if (!value) return;
+      const { id } = this.asset;
+      try {
+        // await the move before refetching, otherwise the reload races ahead
+        // of the PATCH and the image lingers in the old folder until a manual
+        // refresh (same race fixed for the folder-create dropdown); surface a
+        // failed move instead of silently swallowing it
+        await ApiService.patch(`train/${id}`, { name: value });
         this.emitter.emit('realoadTrain');
+      } catch (error) {
+        this.emitter.emit('error', error);
       }
     },
   },
