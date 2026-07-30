@@ -1,4 +1,16 @@
 FROM node:20-bookworm-slim AS build
+ARG DEBIAN_FRONTEND=noninteractive
+
+# Build toolchain + native headers so node-gyp can compile any native module
+# (better-sqlite3, canvas, sharp) from source when no prebuilt binary matches
+# the base image's exact Node version. Prebuilds are used when available; this
+# is the fallback that keeps the build from failing on a toolchain-less base.
+# The toolchain lives only in this build stage - the runtime image stays slim.
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends \
+    python3 make g++ pkg-config \
+    libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev \
+  && rm -rf /var/lib/apt/lists/*
 
 # dependency layers first: they only rebuild when a lockfile changes
 WORKDIR /double-take/api
