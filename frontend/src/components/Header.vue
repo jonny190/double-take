@@ -449,14 +449,15 @@ export default {
             if (!$this.createFolder.name) return;
             $this.createFolder.show = false;
             $this.folder = $this.createFolder.name.toLowerCase();
-            $this.$nextTick(() => {
-              ApiService.post(`filesystem/folders/${$this.folder}`);
-              $this.get().folders();
-              $this.$toast.add({
-                severity: 'success',
-                detail: 'Folder created',
-                life: 3000,
-              });
+            // await the create before refetching, otherwise the folder list is
+            // read before the new folder exists server-side and the dropdown
+            // only shows it after a manual page refresh
+            await ApiService.post(`filesystem/folders/${$this.folder}`);
+            await $this.get().folders();
+            $this.$toast.add({
+              severity: 'success',
+              detail: 'Folder created',
+              life: 3000,
             });
           } catch (error) {
             $this.emitter.emit('error', error);
