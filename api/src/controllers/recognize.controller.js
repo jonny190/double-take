@@ -22,6 +22,12 @@ const { IDS, MATCH_IDS } = {
   MATCH_IDS: [],
 };
 
+// dedup windows: keep a generous last-N so repeat events are still caught, but
+// bound the arrays so a long-running process doesn't grow them (and their
+// .includes scans) without limit. Trim in place so the shared reference passed
+// into process.util stays valid.
+const { boundedPush } = require('../util/helpers.util');
+
 let PROCESSING = false;
 
 module.exports.test = async (req, res) => {
@@ -185,7 +191,7 @@ module.exports.start = async (req, res) => {
     mqtt.recognize(output);
     notify.publish(output, camera, results);
     if (event.type === 'frigate') frigate.subLabel(event.topic, id, best);
-    if (output.matches.length) IDS.push(id);
+    if (output.matches.length) boundedPush(IDS, id);
     if (results.length) emit('recognize', true);
   } catch (error) {
     PROCESSING = false;
@@ -199,18 +205,22 @@ module.exports.upload = async (req, res) => {
     const { buffer } = file;
     const filename = `${uuidv4()}.jpg`;
     fs.writer(`${STORAGE.TMP.PATH}/${filename}`, buffer);
-    await axios({
-      method: 'get',
-      url: `http://0.0.0.0:${SERVER.PORT}${UI.PATH}/api/recognize`,
-      headers: AUTH ? { authorization: jwt.sign({ route: 'recognize' }) } : null,
-      params: {
-        // STORAGE.TMP.PATH is absolute: joining with a bare "/api" avoids a
-        // double slash, which Express 5 no longer matches against the mount
-        url: `http://0.0.0.0:${SERVER.PORT}${UI.PATH}/api${STORAGE.TMP.PATH}/${filename}`,
-        camera: 'manual',
-      },
-      validateStatus: () => true,
-    });
-    fs.delete(`${STORAGE.TMP.PATH}/${filename}`);
+    try {
+      await axios({
+        method: 'get',
+        url: `http://0.0.0.0:${SERVER.PORT}${UI.PATH}/api/recognize`,
+        headers: AUTH ? { authorization: jwt.sign({ route: 'recognize' }) } : null,
+        params: {
+          // STORAGE.TMP.PATH is absolute: joining with a bare "/api" avoids a
+          // double slash, which Express 5 no longer matches against the mount
+          url: `http://0.0.0.0:${SERVER.PORT}${UI.PATH}/api${STORAGE.TMP.PATH}/${filename}`,
+          camera: 'manual',
+        },
+        validateStatus: () => true,
+      });
+    } finally {
+      // always clean up the temp upload, even if the self-fetch throws
+      fs.delete(`${STORAGE.TMP.PATH}/${filename}`);
+    }
   }
 };

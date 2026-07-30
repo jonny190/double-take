@@ -4,6 +4,7 @@ const perf = require('execution-time')();
 const { v4: uuidv4 } = require('uuid');
 const filesystem = require('./fs.util');
 const database = require('./db.util');
+const { boundedPush } = require('./helpers.util');
 const { parse, digest } = require('./auth.util');
 const mask = require('./mask-image.util');
 const sleep = require('./sleep.util');
@@ -105,7 +106,7 @@ module.exports.polling = async (
         filesystem.delete(tmp.source);
 
         if (foundMatch) {
-          MATCH_IDS.push(id);
+          boundedPush(MATCH_IDS, id);
           if (breakMatch === true) break;
         }
       }

@@ -12,9 +12,23 @@ module.exports.connect = () => {
   return connection;
 };
 
+module.exports.close = () => {
+  if (connection) {
+    connection.close();
+    connection = false;
+  }
+};
+
 module.exports.init = async () => {
   try {
     const db = database.connect();
+
+    // WAL makes each write cheaper (fewer fsyncs -> shorter event-loop stalls)
+    // and lets an external reader/backup run without blocking. NOTE: this adds
+    // -wal and -shm sidecar files next to database.db - include them in any
+    // backup/copy of the .storage volume.
+    db.pragma('journal_mode = WAL');
+    db.pragma('synchronous = NORMAL');
 
     database.migrations();
 
