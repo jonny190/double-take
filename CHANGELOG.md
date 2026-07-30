@@ -1,3 +1,10 @@
+## [1.14.13](https://github.com/jonny190/double-take/compare/v1.14.12...v1.14.13) (2026-07-30)
+
+
+### Bug Fixes
+
+* release the reliability-hygiene changes ([10576ae](https://github.com/jonny190/double-take/commit/10576aea239f49881ef042618edf780c52c37a5f))
+
 ## [1.14.12](https://github.com/jonny190/double-take/compare/v1.14.11...v1.14.12) (2026-07-30)
 
 
