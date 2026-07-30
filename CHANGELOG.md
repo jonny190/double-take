@@ -1,3 +1,10 @@
+## [1.14.11](https://github.com/jonny190/double-take/compare/v1.14.10...v1.14.11) (2026-07-30)
+
+
+### Bug Fixes
+
+* **build:** install a build toolchain in the Docker build stage ([c1c3409](https://github.com/jonny190/double-take/commit/c1c3409923b1ab62fe00278981e884789a226801))
+
 ## [1.14.10](https://github.com/jonny190/double-take/compare/v1.14.9...v1.14.10) (2026-07-30)
 
 
