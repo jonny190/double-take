@@ -131,14 +131,17 @@ Half of the bundled detectors point at abandoned upstreams.
 ## Phase 5 — Runtime & packaging hygiene
 
 - ✅ Moved the Docker base from `ubuntu:20.04` (past EOL) to
-  `node:20-bookworm-slim` for both the production and dev images. No more
-  NodeSource script or compiler toolchain: `canvas`, `sharp`, and
-  `better-sqlite3` all install from prebuilt binaries on amd64/arm64.
-  Dependency layers now use `npm ci` with lockfiles, so they cache until a
-  lockfile changes. Image size dropped from 1.73GB to 547MB (415MB to 121MB
-  compressed). arm/v7 stays out of the matrix: official `node` images do ship
-  arm/v7 variants, but `canvas` has no armhf prebuild, so restoring it means
-  from-source compiles under QEMU.
+  `node:20-bookworm-slim` for both the production and dev images (no more
+  NodeSource script). Dependency layers use `npm ci` with lockfiles, so they
+  cache until a lockfile changes. Image size dropped from 1.73GB to ~550MB.
+  arm/v7 stays out of the matrix: official `node` images do ship arm/v7
+  variants, but `canvas` has no armhf prebuild.
+  Note: the build stage carries a compiler toolchain (python3/make/g++ + the
+  canvas headers) so node-gyp can build any native module from source when no
+  prebuilt binary matches the base image's exact Node version - a
+  `better-sqlite3` 12 bump hit exactly this (no prebuild for the pinned Node,
+  source fallback failed on the toolchain-less base). The toolchain lives only
+  in the build stage; the runtime image stays slim.
 - ✅ Reassessed the bundled `opencv.js` emscripten blob (~8.5MB). It turned out
   to already be well-gated: it is `require()`d lazily inside `opencv.load()`,
   which `server.js` only calls when a detector sets `opencv_face_required`, so a
