@@ -58,8 +58,23 @@ module.exports.validate = (schemas) => (req, res, next) => {
       );
     }
 
-    // update request to use validate values which may be transformed
-    req[key] = value;
+    // Update the request to use the validated values (which may be
+    // transformed/defaulted by Joi). Express 5 exposes `req.query` as an
+    // accessor with no setter (it's re-parsed from `req.url` on every read),
+    // so a plain `req[key] = value` assignment silently no-ops for `key ===
+    // 'query'` instead of throwing - callers that rely on a Joi `.default()`
+    // for an omitted query param (e.g. GET /api/recognize without
+    // `&attempts=`) then see `undefined` downstream rather than the
+    // documented default. Defining an own data property shadows the
+    // prototype's accessor and works for every `key`, including the plain
+    // writable properties (`body`, `params`) that a straight assignment
+    // already handled correctly.
+    Object.defineProperty(req, key, {
+      value,
+      writable: true,
+      configurable: true,
+      enumerable: true,
+    });
   }
 
   if (errors.length) return res.status(422).send({ errors });
