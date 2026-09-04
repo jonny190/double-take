@@ -141,11 +141,20 @@ module.exports.save = async (event, results, filename, tmp) => {
   }
 };
 
-module.exports.start = async ({ camera, filename, tmp, attempts = 1, errors = {} }) => {
+module.exports.start = async ({
+  camera,
+  filename,
+  tmp,
+  attempts = 1,
+  errors = {},
+  // manual actions (UI reprocess) set this false so the opencv pre-check
+  // can't skip every detector and wipe the match's existing results
+  preCheck = true,
+}) => {
   const processed = [];
   const promises = [];
 
-  const faceCount = opencv.shouldLoad() ? await opencv.faceCount(tmp) : null;
+  const faceCount = preCheck && opencv.shouldLoad() ? await opencv.faceCount(tmp) : null;
 
   for (const detector of DETECTORS) {
     if (!errors[detector]) errors[detector] = 0;
@@ -153,7 +162,7 @@ module.exports.start = async ({ camera, filename, tmp, attempts = 1, errors = {}
     const detectorConfig = config()?.detectors?.[detector];
     const cameraAllowed =
       (detectorConfig?.cameras || [camera]).includes(camera) || !detectorConfig?.cameras.length;
-    const faceCountRequired = detectorConfig?.opencv_face_required;
+    const faceCountRequired = preCheck && detectorConfig?.opencv_face_required;
 
     if (cameraAllowed) {
       if ((faceCountRequired && faceCount > 0) || !faceCountRequired) {
