@@ -153,6 +153,7 @@ module.exports.reprocess = async (req, res) => {
     camera: tryParseJSON(match.event) ? tryParseJSON(match.event).camera : null,
     filename: match.filename,
     tmp: `${STORAGE.MEDIA.PATH}/matches/${match.filename}`,
+    preCheck: false,
   });
   database.update.match({
     id: match.id,
