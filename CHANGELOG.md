@@ -1,3 +1,10 @@
+## [1.14.14](https://github.com/jonny190/double-take/compare/v1.14.13...v1.14.14) (2026-09-04)
+
+
+### Bug Fixes
+
+* **api:** bypass opencv pre-check on manual reprocess ([455e4eb](https://github.com/jonny190/double-take/commit/455e4eb1c2fdaf6c6f26bdca15ecf12063cd5e7e))
+
 ## [1.14.13](https://github.com/jonny190/double-take/compare/v1.14.12...v1.14.13) (2026-07-30)
 
 
